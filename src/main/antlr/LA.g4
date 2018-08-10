@@ -1,0 +1,3 @@
+grammar LA;
+
+programa: EOF;

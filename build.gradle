@@ -1,0 +1,15 @@
+description = """
+Implementação de um compilador da linguagem LA para código C
+
+Nome do projeto: ${project.name}
+"""
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'antlr'
+
+dependencies {
+    antlr "org.antlr:antlr4:4.7"
+}
