@@ -8,8 +8,23 @@ repositories {
     mavenCentral()
 }
 
+apply plugin: 'java'
 apply plugin: 'antlr'
 
 dependencies {
     antlr "org.antlr:antlr4:4.7"
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'LA Compiler',
+            'Implementation-Version': '0.1',
+            'Main-Class': 'org.lalang.LAMain'
+    }
+}
+
+task run(type: JavaExec) {
+    classpath = files('build/libs/LAMain.jar')
+    classpath += sourceSets.main.runtimeClasspath
+    main = 'org.lalang.LAMain'
 }
