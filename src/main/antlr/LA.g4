@@ -1,5 +1,9 @@
 grammar LA;
 
+@header {
+    package org.lalang;
+}
+
 // REGRAS SINTÁTICAS
 
 programa
@@ -21,3 +25,5 @@ NUM_FLOAT
 
 fragment DIGIT
     : [0-9]+;
+
+programa: EOF;

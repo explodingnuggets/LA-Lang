@@ -21,6 +21,10 @@ jar {
             'Implementation-Version': '0.1',
             'Main-Class': 'org.lalang.LAMain'
     }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 task run(type: JavaExec) {
