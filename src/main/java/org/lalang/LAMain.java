@@ -16,6 +16,7 @@ class LAMain {
                 LALexer lexer = new LALexer(input);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 LAParser parser = new LAParser(tokens);
+                parser.programa();
 
             } catch (IOException exception) {
                 System.out.println("Erro ao abrir o arquivo: " + exception.getMessage());
