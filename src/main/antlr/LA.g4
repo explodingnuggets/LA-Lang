@@ -25,5 +25,3 @@ NUM_FLOAT
 
 fragment DIGIT
     : [0-9]+;
-
-programa: EOF;
