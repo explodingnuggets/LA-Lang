@@ -25,3 +25,6 @@ NUM_FLOAT
 
 fragment DIGIT
     : [0-9]+;
+
+WS
+    : [ \n\r\t]+ -> channel(HIDDEN);
