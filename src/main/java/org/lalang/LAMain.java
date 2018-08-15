@@ -12,11 +12,16 @@ class LAMain {
             System.out.println("java -jar la source_code");
         } else {
             try {
+                StringBuffer out = new StringBuffer();
                 CharStream input = CharStreams.fromFileName(args[0]);
                 LALexer lexer = new LALexer(input);
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 LAParser parser = new LAParser(tokens);
-                parser.programa();
+
+                LASemantico semantico = new LASemantico(out);
+                semantico.visitPrograma(parser.programa());
+
+                System.out.println(out);
 
             } catch (IOException exception) {
                 System.out.println("Erro ao abrir o arquivo: " + exception.getMessage());
