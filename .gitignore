@@ -34,3 +34,7 @@ bin/
 # Gradle Config Files
 .classpath
 .project
+
+# Exclude corretor's jars
+!corretor/*.jar
+!corretor/*/*.jar

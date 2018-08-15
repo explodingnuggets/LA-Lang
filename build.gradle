@@ -21,6 +21,10 @@ jar {
             'Implementation-Version': '0.1',
             'Main-Class': 'org.lalang.LAMain'
     }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 task run(type: JavaExec) {
@@ -28,3 +32,36 @@ task run(type: JavaExec) {
     classpath += sourceSets.main.runtimeClasspath
     main = 'org.lalang.LAMain'
 }
+
+task sintatico {
+    doLast {
+        exec {
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'sintatico'
+        }
+    }
+}
+
+task semantico {
+    doLast {
+        exec {
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'semantico'
+        }
+    }
+}
+
+task gerador {
+    doLast {
+        exec {
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'gerador'
+        }
+    }
+}
+
+task tudo {
+    doLast {
+        exec {
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'tudo'
+        }
+    }
+}
+

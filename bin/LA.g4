@@ -1,9 +1,5 @@
 grammar LA;
 
-@header {
-    package org.lalang;
-}
-
 // REGRAS SINTÁTICAS
 
 programa
@@ -162,7 +158,7 @@ expressao
     : termo_logico (op_logico_1 termo_logico)*;
 
 termo_logico
-    : fator_logico (op_logico_2 fator_logico)*;
+    : fator_logico (op_logico_2 fator_logico);
 
 fator_logico
     : ('nao')? parcela_logica;
@@ -183,19 +179,13 @@ IDENT
     : [a-zA-Z_][a-zA-Z_0-9]*;
 
 CADEIA
-    : '"' (~('"')|'\\"')* '"';
+    : '"' ~('\\'|'"')* '"';
 
 NUM_INT
     : DIGIT+;
 
 NUM_REAL
-    : DIGIT+ '.' DIGIT+;
+    : DIGIT+ ',' DIGIT+;
 
 fragment DIGIT
     : [0-9];
-
-COMENTARIO
-    : '{' ~('}')* '}' -> channel(HIDDEN);
-
-WS
-    : [ \n\r\t]+ -> channel(HIDDEN);
