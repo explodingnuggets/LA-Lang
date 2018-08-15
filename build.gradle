@@ -15,6 +15,10 @@ dependencies {
     antlr "org.antlr:antlr4:4.7"
 }
 
+generateGrammarSource {
+    arguments += ['-visitor']
+}
+
 jar {
     manifest {
         attributes 'Implementation-Title': 'LA Compiler',
