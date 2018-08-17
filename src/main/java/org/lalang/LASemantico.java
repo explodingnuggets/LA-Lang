@@ -1,14 +1,29 @@
 package org.lalang;
 
-class LASemantico extends LABaseVisitor<Object> {
+class LASemantico extends LABaseVisitor<String> {
     private StringBuffer out;
 
     public LASemantico(StringBuffer out) {
         this.out = out;
     }
 
+    private String toCType(String type) {
+        switch(type) {
+            case "inteiro":
+                return "int";
+            case "real":
+                return "double";
+            case "literal":
+                return "char[]";
+            case "logico":
+                return "int";
+            default:
+                return null;
+        }
+    }
+
     @Override
-    public Object visitDecl_procedimento(LAParser.Decl_procedimentoContext ctx) {
+    public String visitDecl_procedimento(LAParser.Decl_procedimentoContext ctx) {
         /*
         * Aqui o código monta o corpo do procedimento (função sem retorno).
         * 1. É criado o cabeçalho da função: void nome(
@@ -37,6 +52,52 @@ class LASemantico extends LABaseVisitor<Object> {
 
         // Passo 5
         this.out.append("}\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitParametros(LAParser.ParametrosContext ctx) {
+        boolean first = true;
+
+        for(LAParser.ParametroContext visit_ctx: ctx.parametro()) {
+            if(!first) {
+                this.out.append(", ");
+            }
+
+            visitParametro(visit_ctx);
+
+            first = false;
+        }
+
+        return null;
+    }
+
+    @Override
+    public String visitParametro(LAParser.ParametroContext ctx) {
+        // TODO: Adicionar paramêtro ao escopo
+        boolean first = true;
+
+        visitTipo_estendido(ctx.tipo_estendido());
+
+        for(LAParser.IdentificadorContext visit_ctx: ctx.identificador()) {
+            if(!first) {
+                this.out.append(", ");
+            }
+
+            this.out.append(visit_ctx.getText());
+
+            first = false;
+        }
+
+        return null;
+    }
+
+    @Override
+    public String visitTipo_estendido(LAParser.Tipo_estendidoContext ctx) {
+        // TODO: Ponteiro
+
+        this.out.append(this.toCType(ctx.tipo_basico_ident().getText()) + " ");
 
         return null;
     }
