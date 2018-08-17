@@ -101,4 +101,25 @@ class LASemantico extends LABaseVisitor<String> {
 
         return null;
     }
+
+    @Override
+    public String visitVariavel(LAParser.VariavelContext ctx) {
+        boolean first = true;
+
+        visitTipo(ctx.tipo());
+
+        for(LAParser.IdentificadorContext visit_ctx: ctx.identificador()) {
+            if(!first) {
+                this.out.append(", ");
+            }
+
+            this.out.append(visit_ctx.getText());
+
+            first = false;
+        }
+
+        this.out.append(";\n");
+
+        return null;
+    }
 }
