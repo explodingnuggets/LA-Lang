@@ -24,10 +24,18 @@ class LAMain {
                 * onde a análise semântica e a análise de código será feita.
                 */
                 StringBuffer out = new StringBuffer();
+                StringBuffer error_out = new StringBuffer();
+                ErrorListener error_listener = new ErrorListener(error_out);
+
                 CharStream input = CharStreams.fromFileName(args[0]);
                 LALexer lexer = new LALexer(input);
+                lexer.removeErrorListeners();
+                lexer.addErrorListener(error_listener);
+
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 LAParser parser = new LAParser(tokens);
+                parser.removeErrorListeners();
+                parser.addErrorListener(error_listener);
 
                 LASemantico semantico = new LASemantico(out);
                 semantico.visitPrograma(parser.programa());
@@ -35,16 +43,24 @@ class LAMain {
                 // Se foram passados dois argumentos, o segundo será tratado como
                 // o caminho de um arquivo, onde a saída será escrita
                 if(args.length < 2) {
-                    System.out.println(out);
+                    if(error_out.length() == 0) {
+                        System.out.println(out);
+                    } else {
+                        System.out.println(error_out);
+                    }
                 } else {
                     BufferedWriter file_out = new BufferedWriter(new FileWriter(new File(args[1])));
 
-                    file_out.write(out.toString());
+                    if(error_out.length() == 0) {
+                        file_out.write(out.toString());
+                    } else {
+                        file_out.write(error_out.toString());
+                        file_out.write("Fim de compilacao");
+                    }
 
                     file_out.flush();
                     file_out.close();
                 }
-
             } catch (IOException exception) {
                 System.out.println("Erro ao abrir o arquivo: " + exception.getMessage());
             }
