@@ -29,12 +29,12 @@ class LAMain {
 
                 CharStream input = CharStreams.fromFileName(args[0]);
                 LALexer lexer = new LALexer(input);
-                lexer.removeErrorListeners();
+                //lexer.removeErrorListeners();
                 lexer.addErrorListener(error_listener);
 
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 LAParser parser = new LAParser(tokens);
-                parser.removeErrorListeners();
+                //parser.removeErrorListeners();
                 parser.addErrorListener(error_listener);
 
                 LASemantico semantico = new LASemantico(out);
@@ -55,7 +55,7 @@ class LAMain {
                         file_out.write(out.toString());
                     } else {
                         file_out.write(error_out.toString());
-                        file_out.write("Fim de compilacao");
+                        file_out.write("Fim da compilacao\n");
                     }
 
                     file_out.flush();

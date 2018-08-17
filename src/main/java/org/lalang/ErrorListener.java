@@ -21,7 +21,7 @@ public class ErrorListener implements ANTLRErrorListener {
     public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
         Token token = (Token)offendingSymbol;
 
-        content.append("Linha " + line + ": erro sintatico proximo a " + token.getText());
+        content.append("Linha " + line + ": erro sintatico proximo a " + token.getText() + "\n");
     }
 
 	@Override
