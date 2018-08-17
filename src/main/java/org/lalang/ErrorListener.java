@@ -5,26 +5,23 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 
 public class ErrorListener implements ANTLRErrorListener {
 
 	StringBuffer content;
-	boolean modified;
-
 
     public ErrorListener(StringBuffer content) {
-		content = new StringBuffer();
-		modified = false;
+		this.content = content;
     }
 
     @Override
     public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        if(!modified) {
-            content.append("Linha " + line +": erro sintatico proximo a " + offendingSymbol);
-            content.append("\nFim da compilacao");
-        }
+        Token token = (Token)offendingSymbol;
+
+        content.append("Linha " + line + ": erro sintatico proximo a " + token.getText());
     }
 
 	@Override
@@ -44,5 +41,4 @@ public class ErrorListener implements ANTLRErrorListener {
 			ATNConfigSet configs) {
 		
 	}
-}
 }
