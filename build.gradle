@@ -32,7 +32,7 @@ jar {
 }
 
 task run(type: JavaExec) {
-    classpath = files('build/libs/LAMain.jar')
+    classpath = files('build/libs/LA-Lang.jar')
     classpath += sourceSets.main.runtimeClasspath
     main = 'org.lalang.LAMain'
 }
@@ -40,7 +40,7 @@ task run(type: JavaExec) {
 task sintatico {
     doLast {
         exec {
-            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'sintatico'
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LA-Lang.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'sintatico'
         }
     }
 }
@@ -48,7 +48,7 @@ task sintatico {
 task semantico {
     doLast {
         exec {
-            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'semantico'
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LA-Lang.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'semantico'
         }
     }
 }
@@ -56,7 +56,7 @@ task semantico {
 task gerador {
     doLast {
         exec {
-            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'gerador'
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LA-Lang.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'gerador'
         }
     }
 }
@@ -64,7 +64,7 @@ task gerador {
 task tudo {
     doLast {
         exec {
-            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LAMain.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'tudo'
+            commandLine 'java', '-jar', 'corretor/CorretorTrabalho1.jar', 'java -jar build/libs/LA-Lang.jar', 'gcc', '/tmp', 'corretor/casos', '726570', 'tudo'
         }
     }
 }
