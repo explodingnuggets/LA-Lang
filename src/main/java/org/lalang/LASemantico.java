@@ -34,13 +34,27 @@ class LASemantico extends LABaseVisitor<String> {
         visitCorpo(ctx.corpo());
 
         this.out.append("return 0\n}\n");
+
+        return null;
     }
 
     @Override 
-    String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
+    public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
 
         for(LAParser.Decl_local_global visit_ctx: ctx.decl_local_global()){
             visitDecl_local_global(visit_ctx);
+        }
+
+        return null;
+    }
+
+    @Override
+    public String visitDecl_local_global(LAParser.Decl_local_global ctx){
+        if(LAParser.Declaracao_local visit ctx: ctx.declaracao_local()){
+            visitDeclaracao_local(visit ctx);
+        }
+        else if(LAParser.Declaracao_global ctx: ctx.declaracao_global()){
+            visitDeclaracao_global(visit ctx);
         }
     }
 
