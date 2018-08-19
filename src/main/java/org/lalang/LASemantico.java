@@ -23,6 +23,28 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitPrograma(LAParser.ProgramaContext ctx) {
+        
+        this.out.append("#include <stdio.h>\n");
+
+        visitDeclaracoes(ctx.declaracoes());
+
+        this.out.append("int main {\n");
+
+        visitCorpo(ctx.corpo());
+
+        this.out.append("return 0\n}\n");
+    }
+
+    @Override 
+    String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
+
+        for(LAParser.Decl_local_global visit_ctx: ctx.decl_local_global()){
+            visitDecl_local_global(visit_ctx);
+        }
+    }
+
+    @Override
     public String visitDecl_procedimento(LAParser.Decl_procedimentoContext ctx) {
         /*
         * Aqui o código monta o corpo do procedimento (função sem retorno).
