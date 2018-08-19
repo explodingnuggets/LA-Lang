@@ -16,7 +16,7 @@ decl_local_global
     : declaracao_local | declaracao_global;
 
 declaracao_local
-    : 'declare' variavel
+    : 'declare' variavel                                       #decl_variavel
     | 'constante' IDENT ':' tipo_basico '=' valor_constante
     | 'tipo' IDENT ':' tipo
     ;

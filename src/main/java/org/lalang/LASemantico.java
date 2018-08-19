@@ -41,7 +41,7 @@ class LASemantico extends LABaseVisitor<String> {
     @Override 
     public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
 
-        for(LAParser.Decl_local_global visit_ctx: ctx.decl_local_global()){
+        for(LAParser.Decl_local_globalContext visit_ctx: ctx.decl_local_global()){
             visitDecl_local_global(visit_ctx);
         }
 
@@ -49,13 +49,37 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
-    public String visitDecl_local_global(LAParser.Decl_local_global ctx){
-        if(LAParser.Declaracao_local visit ctx: ctx.declaracao_local()){
-            visitDeclaracao_local(visit ctx);
+    public String visitDecl_local_global(LAParser.Decl_local_globalContext ctx){
+
+        if(LAParser.Declaracao_localContext visit_ctx: ctx.declaracao_local()){
+            visitDeclaracao_local(visit_ctx);
         }
-        else if(LAParser.Declaracao_global ctx: ctx.declaracao_global()){
-            visitDeclaracao_global(visit ctx);
+        else if(LAParser.Declaracao_globalContext visit_ctx: ctx.declaracao_global()){
+            visitDeclaracao_global(visit_ctx);
         }
+
+        return null;
+    }
+
+    @Override
+    public String visitVariavel(LAParser.VariavelContext ctx) {
+        boolean first = true;
+
+        visitTipo(ctx.tipo());
+
+        for(LAParser.IdentificadorContext visit_ctx: ctx.identificador()) {
+            if(!first) {
+                this.out.append(", ");
+            }
+
+            this.out.append(visit_ctx.getText());
+
+            first = false;
+        }
+
+        this.out.append(";\n");
+
+        return null;
     }
 
     @Override
@@ -134,27 +158,6 @@ class LASemantico extends LABaseVisitor<String> {
         // TODO: Ponteiro
 
         this.out.append(this.toCType(ctx.tipo_basico_ident().getText()) + " ");
-
-        return null;
-    }
-
-    @Override
-    public String visitVariavel(LAParser.VariavelContext ctx) {
-        boolean first = true;
-
-        visitTipo(ctx.tipo());
-
-        for(LAParser.IdentificadorContext visit_ctx: ctx.identificador()) {
-            if(!first) {
-                this.out.append(", ");
-            }
-
-            this.out.append(visit_ctx.getText());
-
-            first = false;
-        }
-
-        this.out.append(";\n");
 
         return null;
     }
