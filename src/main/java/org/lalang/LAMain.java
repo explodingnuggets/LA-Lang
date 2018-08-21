@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 class LAMain {
     public static void main(String[] args){
@@ -25,20 +26,26 @@ class LAMain {
                 */
                 StringBuffer out = new StringBuffer();
                 StringBuffer error_out = new StringBuffer();
-                ErrorListener error_listener = new ErrorListener(error_out);
+                try {
+                    ErrorListener error_listener = new ErrorListener(error_out);
 
-                CharStream input = CharStreams.fromFileName(args[0]);
-                LALexer lexer = new LALexer(input);
-                //lexer.removeErrorListeners();
-                lexer.addErrorListener(error_listener);
+                    CharStream input = CharStreams.fromFileName(args[0]);
+                    LALexer lexer = new LALexer(input);
+                    lexer.removeErrorListeners();
+                    lexer.addErrorListener(error_listener);
 
-                CommonTokenStream tokens = new CommonTokenStream(lexer);
-                LAParser parser = new LAParser(tokens);
-                //parser.removeErrorListeners();
-                parser.addErrorListener(error_listener);
-
-                LASemantico semantico = new LASemantico(out);
-                semantico.visitPrograma(parser.programa());
+                    CommonTokenStream tokens = new CommonTokenStream(lexer);
+                    LAParser parser = new LAParser(tokens);
+                    parser.removeErrorListeners();
+                    parser.addErrorListener(error_listener);
+                    parser.programa();
+                } catch (ParseCancellationException e) {
+                    if(error_out.length() == 0) {
+                        error_out.append(e.getMessage());
+                    }
+                }
+                //LASemantico semantico = new LASemantico(out);
+                //semantico.visitPrograma(parser.programa());
 
                 // Se foram passados dois argumentos, o segundo será tratado como
                 // o caminho de um arquivo, onde a saída será escrita

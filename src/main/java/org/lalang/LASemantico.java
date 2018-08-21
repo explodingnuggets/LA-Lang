@@ -29,15 +29,16 @@ class LASemantico extends LABaseVisitor<String> {
 
         visitDeclaracoes(ctx.declaracoes());
 
-        this.out.append("int main {\n");
+        this.out.append("int main() {\n");
 
         visitCorpo(ctx.corpo());
 
-        this.out.append("return 0\n}\n");
+        this.out.append("return 0;\n}\n");
 
         return null;
     }
 
+    /*
     @Override 
     public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
 
@@ -46,20 +47,21 @@ class LASemantico extends LABaseVisitor<String> {
         }
 
         return null;
-    }
+    }*/
 
+    /*
     @Override
     public String visitDecl_local_global(LAParser.Decl_local_globalContext ctx){
 
-        if(LAParser.Declaracao_localContext visit_ctx: ctx.declaracao_local()){
-            visitDeclaracao_local(visit_ctx);
-        }
-        else if(LAParser.Declaracao_globalContext visit_ctx: ctx.declaracao_global()){
-            visitDeclaracao_global(visit_ctx);
+        if(ctx.declaracao_local() != null) {
+            visitDeclaracao_local(ctx.declaracao_local());
+        } else if(ctx.declaracao_global() != null) {
+            // LAParser.Decl_procedimentoContext(ctx.declaracao_global());
+            // visitDeclaracao_global(ctx.declaracao_global());
         }
 
         return null;
-    }
+    }*/
 
     @Override
     public String visitVariavel(LAParser.VariavelContext ctx) {

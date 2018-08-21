@@ -7,13 +7,14 @@ grammar LA;
 // REGRAS SINTÁTICAS
 
 programa
-    : declaracoes 'algoritmo' corpo 'fim_algoritmo' EOF;
+    : declaracoes 'algoritmo' corpo 'fim_algoritmo';
 
 declaracoes
     : (decl_local_global)*;
 
 decl_local_global
-    : declaracao_local | declaracao_global;
+    : declaracao_local
+    | declaracao_global;
 
 declaracao_local
     : 'declare' variavel                                       #decl_variavel
@@ -199,3 +200,6 @@ COMENTARIO
 
 WS
     : [ \n\r\t]+ -> channel(HIDDEN);
+
+ERRO
+    : .;
