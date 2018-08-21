@@ -3,22 +3,23 @@ package org.lalang;
 import java.util.Stack;
 
 class PilhaDeTabelas {
-    private PilhaDeTabelas instancia;
+    private static PilhaDeTabelas instancia;
     private Stack<TabelaDeSimbolos> pilha;
 
     private PilhaDeTabelas() {
         this.pilha = new Stack<TabelaDeSimbolos>();
+        this.pilha.add(new TabelaDeSimbolos());
     }
 
     /*
     * Aqui está sendo utilizado o padrão Singleton, para que só exista uma
     * única pilha de tabelas de símbolos durante toda a execução do programa.
     */
-    public PilhaDeTabelas getInstancia() {
-        if(this.instancia == null)
-            this.instancia = new PilhaDeTabelas();
+    public static PilhaDeTabelas getInstancia() {
+        if(PilhaDeTabelas.instancia == null)
+            PilhaDeTabelas.instancia = new PilhaDeTabelas();
 
-        return this.instancia;
+        return PilhaDeTabelas.instancia;
     }
 
     public TabelaDeSimbolos novaTabela() {
@@ -26,6 +27,22 @@ class PilhaDeTabelas {
         this.pilha.add(tabela);
 
         return tabela;
+    }
+
+    public boolean adicionarSimbolo(String nome, String tipo) {
+        return this.getTabela().adicionarEntrada(nome, tipo);
+    }
+
+    public EntradaSimbolo encontrarVariavel(String nome) {
+        EntradaSimbolo simbolo;
+
+        for(TabelaDeSimbolos tabela: this.pilha) {
+            simbolo = tabela.encontrarEntrada(nome);
+            if(simbolo != null)
+                return simbolo;
+        }
+
+        return null;
     }
 
     public TabelaDeSimbolos getTabela() {

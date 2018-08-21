@@ -9,7 +9,7 @@ class TabelaDeSimbolos {
         this.tabela = new Hashtable<String, EntradaSimbolo>();
     }
 
-    public boolean adicionarEntrada(String nome, TipoDeDado tipo) {
+    public boolean adicionarEntrada(String nome, String tipo) {
         if(this.tabela.get(nome) == null) {
             this.tabela.put(nome, new EntradaSimbolo(nome, tipo));
 
@@ -19,7 +19,7 @@ class TabelaDeSimbolos {
         return false;
     }
 
-    public boolean adicionarEntrada(String nome, TipoDeDado tipo, String valor) {
+    public boolean adicionarEntrada(String nome, String tipo, String valor) {
         if(this.adicionarEntrada(nome, tipo)) {
             this.encontrarEntrada(nome).setValor(valor);
 

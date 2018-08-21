@@ -38,14 +38,14 @@ class LAMain {
                     LAParser parser = new LAParser(tokens);
                     parser.removeErrorListeners();
                     parser.addErrorListener(error_listener);
-                    parser.programa();
+                    
+                    LASemantico semantico = new LASemantico(out);
+                    semantico.visitPrograma(parser.programa());
                 } catch (ParseCancellationException e) {
                     if(error_out.length() == 0) {
                         error_out.append(e.getMessage());
                     }
                 }
-                //LASemantico semantico = new LASemantico(out);
-                //semantico.visitPrograma(parser.programa());
 
                 // Se foram passados dois argumentos, o segundo será tratado como
                 // o caminho de um arquivo, onde a saída será escrita
