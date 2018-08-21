@@ -34,6 +34,26 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitCmdSe(LAParser.CmdSeContext ctx) {
+        this.pilha.novaTabela();
+
+        for(LAParser.CmdContext cmdCtx: ctx.seCmd) {
+            visitCmd(cmdCtx);
+        }
+
+        this.pilha.removerTabela();
+        this.pilha.novaTabela();
+
+        for(LAParser.CmdContext cmdCtx: ctx.senaoCmd) {
+            visitCmd(cmdCtx);
+        }
+
+        this.pilha.removerTabela();
+
+        return null;
+    }
+
+    @Override
     public String visitDeclFuncao(LAParser.DeclFuncaoContext ctx) {
         // TODO: inserir função no escopo global
 
