@@ -26,25 +26,23 @@ class LAMain {
                 */
                 StringBuffer out = new StringBuffer();
                 StringBuffer error_out = new StringBuffer();
-                try {
-                    ErrorListener error_listener = new ErrorListener(error_out);
 
-                    CharStream input = CharStreams.fromFileName(args[0]);
-                    LALexer lexer = new LALexer(input);
-                    lexer.removeErrorListeners();
-                    lexer.addErrorListener(error_listener);
+                ErrorListener error_listener = new ErrorListener(error_out);
 
-                    CommonTokenStream tokens = new CommonTokenStream(lexer);
-                    LAParser parser = new LAParser(tokens);
-                    parser.removeErrorListeners();
-                    parser.addErrorListener(error_listener);
-                    
+                CharStream input = CharStreams.fromFileName(args[0]);
+                LALexer lexer = new LALexer(input);
+                lexer.removeErrorListeners();
+                lexer.addErrorListener(error_listener);
+
+                CommonTokenStream tokens = new CommonTokenStream(lexer);
+                LAParser parser = new LAParser(tokens);
+                parser.removeErrorListeners();
+                parser.addErrorListener(error_listener);
+                LAParser.ProgramaContext ast = parser.programa();
+                
+                if(error_out.length() == 0) {
                     LASemantico semantico = new LASemantico(out);
                     semantico.visitPrograma(parser.programa());
-                } catch (ParseCancellationException e) {
-                    if(error_out.length() == 0) {
-                        error_out.append(e.getMessage());
-                    }
                 }
 
                 // Se foram passados dois argumentos, o segundo será tratado como
