@@ -1,14 +1,19 @@
 package org.lalang;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 class LASemantico extends LABaseVisitor<String> {
-    private StringBuffer out;
+    private ErrorBuffer out;
     private PilhaDeTabelas pilha;
 
-    public LASemantico(StringBuffer out) {
+    public LASemantico(ErrorBuffer out) {
         this.out = out;
         this.pilha = PilhaDeTabelas.getInstancia();
+    }
+
+    public void checarTipo(String tipo, String valor) {
+        
     }
 
     @Override
@@ -121,6 +126,26 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
+        String nome = ctx.identificador().first.getText();
+
+        for(Token identCtx: ctx.identificador().rest) {
+            nome += "." + identCtx.getText();
+        }
+
+        EntradaSimbolo simbolo = this.pilha.encontrarVariavel(nome);
+        if(simbolo == null) {
+            out.println("Linha " + ctx.identificador().start.getLine() + ": identificador nao declarado");
+        } else {
+            String tipo = simbolo.getTipo();
+
+            this.checarTipo(tipo, ctx.expressao().getText());
+        }
+
+        return null;
+    }
+
+    @Override
     public String visitDeclFuncao(LAParser.DeclFuncaoContext ctx) {
         // TODO: inserir função no escopo global
 
@@ -150,7 +175,7 @@ class LASemantico extends LABaseVisitor<String> {
                 first = false;
             }
 
-            this.pilha.adicionarSimbolo(nome, tipo);
+            //this.pilha.adicionarSimbolo(nome, tipo);
         }
 
         return null;

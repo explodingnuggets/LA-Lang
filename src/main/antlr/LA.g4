@@ -26,7 +26,7 @@ variavel
     : identificador (',' identificador)* ':' tipo;
 
 identificador
-    : IDENT ('.' IDENT)* dimensao;
+    : first=IDENT ('.' rest+=IDENT)* dimensao;
 
 dimensao
     : ('[' exp_aritmetica ']')*;

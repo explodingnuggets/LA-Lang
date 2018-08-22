@@ -11,35 +11,28 @@ import org.antlr.v4.runtime.dfa.DFA;
 
 public class ErrorListener implements ANTLRErrorListener {
 
-	StringBuffer content;
-	boolean isModified = false;
+	ErrorBuffer out;
 
-    public ErrorListener(StringBuffer content) {
-		this.content = content;
+    public ErrorListener(ErrorBuffer out) {
+		this.out = out;
     }
 
     @Override
     public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        Token token = (Token)offendingSymbol;
-		if(!isModified) {
-			content.append("Linha " + line + ": ");
-            if(token.getType() == LALexer.ERRO) {
-				if(token.getText().equals("{")) {
-					content.setLength(0);
-					content.append("Linha " + (line+1) + ": comentario nao fechado\n");
-				} else {
-					content.append(token.getText() + " - simbolo nao identificado\n");
-				}
-			} else {
-				content.append("erro sintatico proximo a ");
-				if(token.getText() == "<EOF>")
-					content.append("EOF\n");
+		Token token = (Token)offendingSymbol;
+		if(!out.modified()) {
+			if(token.getType() == LALexer.ERRO) {
+				if(token.getText().equals("{"))
+					out.println("Linha " + (line+1) + ": comentario nao fechado");
 				else
-					content.append(token.getText() + "\n");
+					out.println("Linha " + line + ": " + token.getText() + " - simbolo nao identificado");
+			} else {
+				if(token.getText() == "<EOF>")
+					out.println("Linha " + line + ": " + "erro sintatico proximo a EOF");
+				else
+					out.println("Linha " + line + ": " + "erro sintatico proximo a " + token.getText());
 			}
-
-			isModified=true;
-	    }
+		}
 	}
 
 	@Override

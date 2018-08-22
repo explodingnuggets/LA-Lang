@@ -25,7 +25,7 @@ class LAMain {
                 * onde a análise semântica e a análise de código será feita.
                 */
                 StringBuffer out = new StringBuffer();
-                StringBuffer error_out = new StringBuffer();
+                ErrorBuffer error_out = new ErrorBuffer();
 
                 ErrorListener error_listener = new ErrorListener(error_out);
 
@@ -40,15 +40,15 @@ class LAMain {
                 parser.addErrorListener(error_listener);
                 LAParser.ProgramaContext ast = parser.programa();
                 
-                if(error_out.length() == 0) {
-                    LASemantico semantico = new LASemantico(out);
+                if(!error_out.modified()) {
+                    LASemantico semantico = new LASemantico(error_out);
                     semantico.visitPrograma(parser.programa());
                 }
 
                 // Se foram passados dois argumentos, o segundo será tratado como
                 // o caminho de um arquivo, onde a saída será escrita
                 if(args.length < 2) {
-                    if(error_out.length() == 0) {
+                    if(!error_out.modified()) {
                         System.out.println(out);
                     } else {
                         System.out.println(error_out);
@@ -56,7 +56,7 @@ class LAMain {
                 } else {
                     BufferedWriter file_out = new BufferedWriter(new FileWriter(new File(args[1])));
 
-                    if(error_out.length() == 0) {
+                    if(!error_out.modified()) {
                         file_out.write(out.toString());
                     } else {
                         file_out.write(error_out.toString());
