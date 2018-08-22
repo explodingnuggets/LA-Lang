@@ -35,6 +35,11 @@ class LASemantico extends LABaseVisitor<String> {
 
     @Override
     public String visitCmdSe(LAParser.CmdSeContext ctx) {
+        /*
+        * São necessários dois escopos diferentes para o comando se, um para os
+        * códigos onde o caso é verdadeiro, e outro para o caso de senão.
+        */
+        // Começo do escopo de se
         this.pilha.novaTabela();
 
         for(LAParser.CmdContext cmdCtx: ctx.seCmd) {
@@ -42,6 +47,8 @@ class LASemantico extends LABaseVisitor<String> {
         }
 
         this.pilha.removerTabela();
+        // Fim do escopo de se
+        // Começo do escopo de senão
         this.pilha.novaTabela();
 
         for(LAParser.CmdContext cmdCtx: ctx.senaoCmd) {
@@ -49,6 +56,66 @@ class LASemantico extends LABaseVisitor<String> {
         }
 
         this.pilha.removerTabela();
+        // Fim do escopo de se
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdCaso(LAParser.CmdCasoContext ctx) {
+        visitExp_aritmetica(ctx.exp_aritmetica());
+
+        this.pilha.novaTabela();
+
+        visitSelecao(ctx.selecao());
+
+        this.pilha.removerTabela();
+        this.pilha.novaTabela();
+
+        for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
+            visitCmd(cmdCtx);
+        }
+
+        this.pilha.removerTabela();
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdPara(LAParser.CmdParaContext ctx) {
+        this.pilha.novaTabela();
+
+        this.pilha.adicionarSimbolo(ctx.IDENT().getText(), "inteiro");
+
+        visitChildren(ctx);
+
+        this.pilha.removerTabela();
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdEnquanto(LAParser.CmdEnquantoContext ctx) {
+        this.pilha.novaTabela();
+
+        visitChildren(ctx);
+
+        this.pilha.removerTabela();
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdFaca(LAParser.CmdFacaContext ctx) {
+        this.pilha.novaTabela();
+
+        for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
+            visitCmd(cmdCtx);
+        }
+
+        this.pilha.removerTabela();
+
+        visitExpressao(ctx.expressao());
 
         return null;
     }
