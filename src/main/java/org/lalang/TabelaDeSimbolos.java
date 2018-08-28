@@ -9,13 +9,14 @@ class TabelaDeSimbolos {
         this.tabela = new Hashtable<String, EntradaSimbolo>();
     }
 
-    public boolean adicionarEntrada(String nome, String tipo) {
+    public boolean adicionarEntrada(String nome, String tipo, int linha) {
         if(this.tabela.get(nome) == null) {
             this.tabela.put(nome, new EntradaSimbolo(nome, tipo));
 
             return true;
         }
 
+        ErrorListener.out.println("Linha " + linha + ": identificador " + nome + ja declarado anteriormente);
         return false;
     }
 

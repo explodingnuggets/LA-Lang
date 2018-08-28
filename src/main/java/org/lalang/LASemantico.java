@@ -20,10 +20,8 @@ class LASemantico extends LABaseVisitor<String> {
     public String visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
 
-        this.pilha.novaTabela();
-
         visitCorpo(ctx.corpo());
-
+        
         return null;
     }
 
@@ -90,7 +88,7 @@ class LASemantico extends LABaseVisitor<String> {
     public String visitCmdPara(LAParser.CmdParaContext ctx) {
         this.pilha.novaTabela();
 
-        this.pilha.adicionarSimbolo(ctx.IDENT().getText(), "inteiro");
+        this.pilha.adicionarSimbolo(ctx.IDENT().getText(), "inteiro", ctx.start.getLine());
 
         visitChildren(ctx);
 
