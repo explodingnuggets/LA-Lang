@@ -26,6 +26,29 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitDeclLocalGlobal(LAParser.DeclLocalGlobalContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitDeclaracaoLocal(LAParser.DeclaracaoLocalContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    //@Override String visitDeclVariavel
+
+    @Override
     public String visitDeclProcedimento(LAParser.DeclProcedimentoContext ctx) {
         this.pilha.novaTabela();
 
