@@ -33,14 +33,14 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
-    public String visitDecl_local_global(LAParser.Decl_local_globalContext ctx) {
+    public String visitDeclLocalGlobal(LAParser.DeclLocalGlobalContext ctx) {
         visitChildren(ctx);
 
         return null;
     }
 
     @Override
-    public String visitDeclaracao_local(LAParser.Declaracao_localContext ctx) {
+    public String visitDeclLocal(LAParser.DeclLocalContext ctx) {
         visitChildren(ctx);
 
         return null;
