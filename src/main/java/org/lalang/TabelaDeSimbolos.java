@@ -16,7 +16,7 @@ class TabelaDeSimbolos {
             return true;
         }
 
-        ErrorListener.out.println("Linha " + linha + ": identificador " + nome + ja declarado anteriormente);
+        ErrorListener.out.println("Linha " + linha + ": identificador " + nome + "ja declarado anteriormente");
         return false;
     }
 

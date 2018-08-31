@@ -46,7 +46,59 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
-    //@Override String visitDeclVariavel
+    @Override
+    public String visitDeclVariavel(LAParser.DeclVariavelContext ctx) {
+        String tipo = ctx.variavel().tipo().getText();
+
+        for(LAParser.IdentificadorContext identCtx: ctx.variavel().identificador()) {
+            String nome = "";
+            boolean first = true;
+
+            for(TerminalNode ident: identCtx.IDENT()) {;
+                if(!first)
+                    nome += ".";
+
+                nome += ident.getText();
+
+                first = false;
+            }
+
+            this.pilha.adicionarSimbolo(nome, tipo, ctx.start.getLine());
+        }
+
+        visitVariavel(ctx.variavel());
+
+        return null;
+    }
+
+    @Override
+    public String visitVariavel(LAParser.VariavelContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitIdentificador(LAParser.IdentificadorContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitDimensao(LAParser.DimensaoContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visiTipo(LAParser.TipoContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
 
     @Override
     public String visitDeclProcedimento(LAParser.DeclProcedimentoContext ctx) {
@@ -175,29 +227,6 @@ class LASemantico extends LABaseVisitor<String> {
         visitChildren(ctx);
 
         this.pilha.removerTabela();
-
-        return null;
-    }
-
-    @Override
-    public String visitDeclVariavel(LAParser.DeclVariavelContext ctx) {
-        String tipo = ctx.variavel().tipo().getText();
-
-        for(LAParser.IdentificadorContext identCtx: ctx.variavel().identificador()) {
-            String nome = "";
-            boolean first = true;
-
-            for(TerminalNode ident: identCtx.IDENT()) {;
-                if(!first)
-                    nome += ".";
-
-                nome += ident.getText();
-
-                first = false;
-            }
-
-            //this.pilha.adicionarSimbolo(nome, tipo);
-        }
 
         return null;
     }
