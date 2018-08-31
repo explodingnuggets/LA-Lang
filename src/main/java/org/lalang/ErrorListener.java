@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 
 public class ErrorListener implements ANTLRErrorListener {
 
-	ErrorBuffer out;
+	public static ErrorBuffer out;
 
     public ErrorListener(ErrorBuffer out) {
 		this.out = out;

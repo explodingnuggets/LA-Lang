@@ -20,12 +20,33 @@ class LASemantico extends LABaseVisitor<String> {
     public String visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
 
-        this.pilha.novaTabela();
-
         visitCorpo(ctx.corpo());
+        
+        return null;
+    }
+
+    @Override
+    public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
+        visitChildren(ctx);
 
         return null;
     }
+
+    @Override
+    public String visitDeclLocalGlobal(LAParser.DeclLocalGlobalContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitDeclaracaoLocal(LAParser.DeclaracaoLocalContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    //@Override String visitDeclVariavel
 
     @Override
     public String visitDeclProcedimento(LAParser.DeclProcedimentoContext ctx) {
@@ -90,7 +111,7 @@ class LASemantico extends LABaseVisitor<String> {
     public String visitCmdPara(LAParser.CmdParaContext ctx) {
         this.pilha.novaTabela();
 
-        this.pilha.adicionarSimbolo(ctx.IDENT().getText(), "inteiro");
+        this.pilha.adicionarSimbolo(ctx.IDENT().getText(), "inteiro", ctx.start.getLine());
 
         visitChildren(ctx);
 
