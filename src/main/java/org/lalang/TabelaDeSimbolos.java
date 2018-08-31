@@ -20,8 +20,8 @@ class TabelaDeSimbolos {
         return false;
     }
 
-    public boolean adicionarEntrada(String nome, String tipo, String valor) {
-        if(this.adicionarEntrada(nome, tipo)) {
+    public boolean adicionarEntrada(String nome, String tipo, String valor, int linha) {
+        if( (this.tabela.get(nome) != null) && this.tabela.get(nome).getTipo()==tipo) {
             this.encontrarEntrada(nome).setValor(valor);
 
             return true;
