@@ -10,12 +10,12 @@ programa
     : declaracoes 'algoritmo' corpo 'fim_algoritmo';
 
 declaracoes
-    : (decl_local_global)* # declLocalGlobal
+    : (decl_local_global)*
     ;
 
 decl_local_global
-    : declaracao_local   # declLocal
-    | declaracao_global  # declGlobal
+    : declaracao_local  
+    | declaracao_global
     ;
 
 declaracao_local
