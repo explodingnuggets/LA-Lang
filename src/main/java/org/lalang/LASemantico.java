@@ -56,10 +56,20 @@ class LASemantico extends LABaseVisitor<String> {
                 first = false;
             }
 
+            if(tipo!="literal"&&tipo!="inteiro"&&tipo!="real"&&tipo!="logico"){
+                out.println("Linha " + ctx.start.getLine() + ": tipo " + tipo + "nao declarado");
+            }
             this.pilha.adicionarSimbolo(nome, tipo, ctx.start.getLine());
         }
 
         visitVariavel(ctx.variavel());
+
+        return null;
+    }
+
+     @Override
+    public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
+        // TODO: adicionar tipos no escopo
 
         return null;
     }
@@ -129,6 +139,18 @@ class LASemantico extends LABaseVisitor<String> {
         this.pilha.removerTabela();
         // Fim do escopo de se
 
+        return null;
+    }
+
+    @Override
+    public String visitCmdLeia(LAParser.CmdLeiaContext ctx){
+        String nome_variavel = ctx.first.getText();
+        if( pilha.encontrarVariavel(nome_variavel) == null ){
+            out.println("Linha " + ctx.start.getLine() + ": identificador " + nome_variavel + "nao declarado");
+        }
+        else {
+            visitChildren(ctx);
+        }
         return null;
     }
 
@@ -224,10 +246,4 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
-    @Override
-    public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
-        // TODO: adicionar tipos no escopo
-
-        return null;
-    }
 }

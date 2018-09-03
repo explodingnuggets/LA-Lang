@@ -25,7 +25,7 @@ declaracao_local
     ;
 
 variavel
-    : identificador (',' identificador)* ':' tipo;
+    : first=identificador (',' rest=identificador)* ':' tipo;
 
 identificador
     : first=IDENT ('.' rest+=IDENT)* dimensao;
@@ -79,7 +79,7 @@ cmd
     ;
 
 cmdLeia
-    : 'leia' '(' ('^')? identificador (',' ('^')? identificador)* ')';
+    : 'leia' '(' ('^')? first=identificador (',' ('^')? rest=identificador)* ')';
 
 cmdEscreva
     : 'escreva' '(' expressao (',' expressao)* ')';
