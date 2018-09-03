@@ -31,18 +31,18 @@ class LAMain {
 
                 CharStream input = CharStreams.fromFileName(args[0]);
                 LALexer lexer = new LALexer(input);
-                lexer.removeErrorListeners();
+                //lexer.removeErrorListeners();
                 lexer.addErrorListener(error_listener);
 
                 CommonTokenStream tokens = new CommonTokenStream(lexer);
                 LAParser parser = new LAParser(tokens);
-                parser.removeErrorListeners();
+                //parser.removeErrorListeners();
                 parser.addErrorListener(error_listener);
                 LAParser.ProgramaContext ast = parser.programa();
                 
                 if(!error_out.modified()) {
                     LASemantico semantico = new LASemantico(error_out);
-                    semantico.visitPrograma(parser.programa());
+                    semantico.visitPrograma(ast);
                 }
 
                 // Se foram passados dois argumentos, o segundo será tratado como
