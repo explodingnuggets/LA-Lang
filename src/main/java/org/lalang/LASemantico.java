@@ -17,6 +17,85 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitPrograma(LAParser.ProgramaContext ctx) {
+        visitDeclaracoes(ctx.declaracoes());
+
+        visitCorpo(ctx.corpo());
+        
+        return null;
+    }
+
+    @Override
+    public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitCorpo(LAParser.CorpoContext ctx) {
+        for(LAParser.Declaracao_localContext decl : ctx.declaracao_local()){
+            if(ctx.variavel()!=null) {
+                visitDeclVariavel(ctx.declVariavel());
+            }
+            else if(ctx.tipo_basico()!=null) {
+                visitDeclConstante(ctx.declConstante());
+            }
+            else if(ctx.tipo()!=null) {
+                visitDeclTipo(ctx.declTipo());
+            }
+        }
+        for(LAParser.CmdContext cmd : ctx.cmd()){
+            visitCmd(cmd);
+        }
+
+        return null;
+    }
+
+    @Override
+    public String visitDecl_local_global(LAParser.Decl_local_globalContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+     @Override
+    public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
+        // TODO: adicionar tipos no escopo
+
+        return null;
+    }
+
+    @Override
+    public String visitVariavel(LAParser.VariavelContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitIdentificador(LAParser.IdentificadorContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitDimensao(LAParser.DimensaoContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+    @Override
+    public String visitTipo(LAParser.TipoContext ctx) {
+        visitChildren(ctx);
+
+        return null;
+    }
+
+
+    @Override
     public String visitDeclProcedimento(LAParser.DeclProcedimentoContext ctx) {
         this.pilha.novaTabela();
 
@@ -52,6 +131,18 @@ class LASemantico extends LABaseVisitor<String> {
         this.pilha.removerTabela();
         // Fim do escopo de se
 
+        return null;
+    }
+
+    @Override
+    public String visitCmdLeia(LAParser.CmdLeiaContext ctx){
+        String nome_variavel = ctx.first.getText();
+        if( pilha.encontrarVariavel(nome_variavel) == null ){
+            out.println("Linha " + ctx.start.getLine() + ": identificador " + nome_variavel + "nao declarado");
+        }
+        else {
+            visitChildren(ctx);
+        }
         return null;
     }
 
@@ -162,16 +253,6 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
-    public String identificadorName(LAParser.IdentificadorContext ctx) {
-        String nome = ctx.first.getText();
-
-        for(Token ident: ctx.rest) {
-            nome += "." + ident.getText();
-        }
-
-        return nome;
-    }
-
     public void declRegistro(LAParser.RegistroContext ctx, String prefix) {
         for(LAParser.VariavelContext varCtx: ctx.variavel()) {
             for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
@@ -185,13 +266,6 @@ class LASemantico extends LABaseVisitor<String> {
                 }
             }
         }
-    }
-
-    @Override
-    public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
-        // TODO: adicionar tipos no escopo
-
-       return null;
     }
 
     @Override
