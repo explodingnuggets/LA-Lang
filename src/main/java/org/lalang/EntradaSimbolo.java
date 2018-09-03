@@ -3,17 +3,12 @@ package org.lalang;
 class EntradaSimbolo {
     private String nome;
     private String tipo;
-    private String valor;
+    private String tipoDeDado;
 
-    public EntradaSimbolo(String nome, String tipo) {
+    public EntradaSimbolo(String nome, String tipo, String tipoDeDado) {
         this.nome = nome;
         this.tipo = tipo;
-    }
-
-    public EntradaSimbolo(String nome, String tipo, String valor) {
-        this.nome = nome;
-        this.tipo = tipo;
-        this.valor = valor;
+        this.tipoDeDado = tipoDeDado;
     }
 
     public String getNome() {
@@ -22,13 +17,5 @@ class EntradaSimbolo {
 
     public String getTipo() {
         return this.tipo;
-    }
-
-    public String getValor() {
-        return this.valor;
-    }
-
-    public void setValor(String valor) {
-        this.valor = valor;
     }
 }

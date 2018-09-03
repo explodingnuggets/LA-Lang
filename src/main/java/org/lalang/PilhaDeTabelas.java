@@ -29,8 +29,8 @@ class PilhaDeTabelas {
         return tabela;
     }
 
-    public boolean adicionarSimbolo(String nome, String tipo, int linha) {
-        return this.getTabela().adicionarEntrada(nome, tipo, linha);
+    public boolean adicionarSimbolo(String nome, String tipo, String tipoDeDado) {
+        return this.getTabela().adicionarEntrada(nome, tipo, tipoDeDado);
     }
 
     public EntradaSimbolo encontrarVariavel(String nome) {

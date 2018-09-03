@@ -17,38 +17,6 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
-    public String visitPrograma(LAParser.ProgramaContext ctx) {
-        visitDeclaracoes(ctx.declaracoes());
-
-        visitCorpo(ctx.corpo());
-        
-        return null;
-    }
-
-    @Override
-    public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
-    public String visitDeclLocalGlobal(LAParser.DeclLocalGlobalContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
-    public String visitDeclaracaoLocal(LAParser.DeclaracaoLocalContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    //@Override String visitDeclVariavel
-
-    @Override
     public String visitDeclProcedimento(LAParser.DeclProcedimentoContext ctx) {
         this.pilha.novaTabela();
 
@@ -111,7 +79,7 @@ class LASemantico extends LABaseVisitor<String> {
     public String visitCmdPara(LAParser.CmdParaContext ctx) {
         this.pilha.novaTabela();
 
-        this.pilha.adicionarSimbolo(ctx.IDENT().getText(), "inteiro", ctx.start.getLine());
+        //this.pilha.adicionarSimbolo(ctx.IDENT().getText(), "inteiro");
 
         visitChildren(ctx);
 
@@ -181,30 +149,66 @@ class LASemantico extends LABaseVisitor<String> {
 
     @Override
     public String visitDeclVariavel(LAParser.DeclVariavelContext ctx) {
-        String tipo = ctx.variavel().tipo().getText();
-
         for(LAParser.IdentificadorContext identCtx: ctx.variavel().identificador()) {
-            String nome = "";
-            boolean first = true;
+            String nome = this.identificadorName(identCtx);
 
-            for(TerminalNode ident: identCtx.IDENT()) {;
-                if(!first)
-                    nome += ".";
-
-                nome += ident.getText();
-
-                first = false;
+            if(ctx.variavel().tipo().registro() == null) {
+                //this.pilha.adicionarSimbolo(nome, ctx.variavel().tipo().getText());
+            } else {
+                this.declRegistro(ctx.variavel().tipo().registro(), nome);
             }
-
-            //this.pilha.adicionarSimbolo(nome, tipo);
         }
 
         return null;
     }
 
+    public String identificadorName(LAParser.IdentificadorContext ctx) {
+        String nome = ctx.first.getText();
+
+        for(Token ident: ctx.rest) {
+            nome += "." + ident.getText();
+        }
+
+        return nome;
+    }
+
+    public void declRegistro(LAParser.RegistroContext ctx, String prefix) {
+        for(LAParser.VariavelContext varCtx: ctx.variavel()) {
+            for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
+                String nome = this.identificadorName(identCtx);
+
+                System.out.println(prefix + "." + nome + ": " + varCtx.tipo().getText());
+                if(varCtx.tipo().registro() == null) {
+                    //this.pilha.adicionarSimbolo(prefix + "." + nome, varCtx.tipo().getText());
+                } else {
+                    this.declRegistro(varCtx.tipo().registro(), prefix + "." + nome);
+                }
+            }
+        }
+    }
+
     @Override
     public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
         // TODO: adicionar tipos no escopo
+
+       return null;
+    }
+
+    @Override
+    public String visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
+        if(ctx.var != null) {
+            String nome = this.identificadorName(ctx.identificador());
+
+            System.out.println(nome);
+        } else if(ctx.func != null) {
+
+        } else if(ctx.inteiro != null) {
+
+        } else if(ctx.real != null) {
+
+        } else {
+
+        }
 
         return null;
     }
