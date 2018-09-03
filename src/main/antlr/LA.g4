@@ -143,10 +143,10 @@ parcela
     : (op_unario)? parcela_unario | parcela_nao_unario;
 
 parcela_unario
-    : ('^')? identificador
-    | IDENT '(' expressao (',' expressao)* ')'
-    | NUM_INT
-    | NUM_REAL
+    : ('^')? var=identificador
+    | func=IDENT '(' expressao (',' expressao)* ')'
+    | inteiro=NUM_INT
+    | real=NUM_REAL
     | '(' expressao ')'
     ;
 
@@ -199,7 +199,7 @@ COMENTARIO
     : '{' ~('}')* '}' -> channel(HIDDEN);
 
 WS
-    : [ \n\r\t]+ -> channel(HIDDEN);
+    : ([ \n\r\t]+ | EOF) -> channel(HIDDEN);
 
 ERRO
     : .;
