@@ -33,6 +33,26 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitCorpo(LAParser.CorpoContext ctx) {
+        for(LAParser.Declaracao_localContext decl : ctx.declaracao_local()){
+            if(ctx.variavel()!=null) {
+                visitDeclVariavel(ctx.declVariavel());
+            }
+            else if(ctx.tipo_basico()!=null) {
+                visitDeclConstante(ctx.declConstante());
+            }
+            else if(ctx.tipo()!=null) {
+                visitDeclTipo(ctx.declTipo());
+            }
+        }
+        for(LAParser.CmdContext cmd : ctx.cmd()){
+            visitCmd(cmd);
+        }
+
+        return null;
+    }
+
+    @Override
     public String visitDecl_local_global(LAParser.Decl_local_globalContext ctx) {
         visitChildren(ctx);
 
