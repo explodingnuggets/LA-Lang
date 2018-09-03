@@ -18,4 +18,8 @@ class EntradaSimbolo {
     public String getTipo() {
         return this.tipo;
     }
+
+    public String getTipoDeDado() {
+        return this.tipoDeDado;
+    }
 }

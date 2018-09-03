@@ -12,8 +12,12 @@ class LASemantico extends LABaseVisitor<String> {
         this.pilha = PilhaDeTabelas.getInstancia();
     }
 
-    public void checarTipo(String tipo, String valor) {
-        
+    public boolean existeTipo(String tipo) {
+        if(tipo.equals("literal") || tipo.equals("inteiro") || tipo.equals("real") || tipo.equals("logico") || this.pilha.encontrarTipo(tipo) != null) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -28,26 +32,6 @@ class LASemantico extends LABaseVisitor<String> {
     @Override
     public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
         visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
-    public String visitCorpo(LAParser.CorpoContext ctx) {
-        for(LAParser.Declaracao_localContext decl : ctx.declaracao_local()){
-            if(ctx.variavel()!=null) {
-                visitDeclVariavel(ctx.declVariavel());
-            }
-            else if(ctx.tipo_basico()!=null) {
-                visitDeclConstante(ctx.declConstante());
-            }
-            else if(ctx.tipo()!=null) {
-                visitDeclTipo(ctx.declTipo());
-            }
-        }
-        for(LAParser.CmdContext cmd : ctx.cmd()){
-            visitCmd(cmd);
-        }
 
         return null;
     }
@@ -138,11 +122,18 @@ class LASemantico extends LABaseVisitor<String> {
     public String visitCmdLeia(LAParser.CmdLeiaContext ctx){
         String nome_variavel = ctx.first.getText();
         if( pilha.encontrarVariavel(nome_variavel) == null ){
-            out.println("Linha " + ctx.start.getLine() + ": identificador " + nome_variavel + "nao declarado");
+            this.out.println("Linha " + ctx.start.getLine() + ": identificador " + nome_variavel + " nao declarado");
         }
-        else {
-            visitChildren(ctx);
+
+        for(LAParser.IdentificadorContext identCtx: ctx.rest) {
+            nome_variavel = identCtx.getText();
+
+            if(this.pilha.encontrarVariavel(nome_variavel) == null)
+                this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome_variavel + " nao declarado");
         }
+
+        visitChildren(ctx);
+
         return null;
     }
 
@@ -217,9 +208,11 @@ class LASemantico extends LABaseVisitor<String> {
         if(simbolo == null) {
             out.println("Linha " + ctx.identificador().start.getLine() + ": identificador nao declarado");
         } else {
-            String tipo = simbolo.getTipo();
+            String tipo = simbolo.getTipoDeDado();
+            String tipoExpressao = visitExpressao(ctx.expressao());
 
-            this.checarTipo(tipo, ctx.expressao().getText());
+            if(!tipo.equals(tipoExpressao) || (tipo.equals("real") && tipo.equals("inteiro")))
+                this.out.println("Linha " + ctx.identificador().start.getLine() + ": atribuicao nao compativel para " + nome);
         }
 
         return null;
@@ -244,13 +237,28 @@ class LASemantico extends LABaseVisitor<String> {
             String nome = this.identificadorName(identCtx);
 
             if(ctx.variavel().tipo().registro() == null) {
-                //this.pilha.adicionarSimbolo(nome, ctx.variavel().tipo().getText());
+                if(!this.pilha.adicionarSimbolo(nome, "variavel" ,ctx.variavel().tipo().getText()))
+                    this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+
+                if(!this.existeTipo(ctx.variavel().tipo().getText()))
+                    this.out.println("Linha " + ctx.variavel().tipo().start.getLine() + ": tipo " + ctx.variavel().tipo().getText() + " nao declarado");
             } else {
                 this.declRegistro(ctx.variavel().tipo().registro(), nome);
             }
         }
 
         return null;
+    }
+
+    public String identificadorName(LAParser.IdentificadorContext ctx) {
+        String nome = ctx.first.getText();
+        //this.pilha.adicionarSimbolo(nome, tipo);
+
+        for(Token ident: ctx.rest) {
+            nome += "." + ident.getText();
+        }
+
+        return nome;
     }
 
     public void declRegistro(LAParser.RegistroContext ctx, String prefix) {
@@ -272,18 +280,170 @@ class LASemantico extends LABaseVisitor<String> {
     public String visitParcela_unario(LAParser.Parcela_unarioContext ctx) {
         if(ctx.var != null) {
             String nome = this.identificadorName(ctx.identificador());
+            EntradaSimbolo simbolo = this.pilha.encontrarVariavel(nome);
 
-            System.out.println(nome);
+            if(simbolo == null) {
+                this.out.println("Linha " + ctx.identificador().start.getLine() + ": identificador " + nome + " nao declarado");
+            } else {
+                return simbolo.getTipoDeDado();
+            }
         } else if(ctx.func != null) {
+            // TODO: retornar tipo de função
 
+            return "";
         } else if(ctx.inteiro != null) {
-
+            return "inteiro";
         } else if(ctx.real != null) {
-
+            return "real";
         } else {
-
+            return visitExpressao(ctx.expr);
         }
 
-        return null;
+        return "";
+    }
+
+    @Override
+    public String visitParcela_nao_unario(LAParser.Parcela_nao_unarioContext ctx) {
+        if(ctx.cadeia != null) {
+            return "literal";
+        } else {
+            String nome = this.identificadorName(ctx.identificador());
+            EntradaSimbolo simbolo = this.pilha.encontrarVariavel(nome);
+
+            if(simbolo == null) {
+                this.out.println("Linha " + ctx.identificador().start.getLine() + ": identificador " + nome + " nao declarado");
+            } else {
+                return "&" + simbolo.getTipoDeDado();
+            }
+        }
+
+        return "";
+    }
+
+    @Override
+    public String visitParcela(LAParser.ParcelaContext ctx) {
+        if(ctx.parcela_unario() != null) {
+            return visitParcela_unario(ctx.parcela_unario());
+        } else {
+            return visitParcela_nao_unario(ctx.parcela_nao_unario());
+        }
+    }
+
+    @Override
+    public String visitFator(LAParser.FatorContext ctx) {
+        String tipo = visitParcela(ctx.first);
+
+        for(LAParser.ParcelaContext parcelaCtx: ctx.rest) {
+            String novoTipo = visitParcela(parcelaCtx);
+            if(!tipo.equals(novoTipo)) {
+                if((tipo.equals("inteiro") && novoTipo.equals("real"))
+                || (tipo.equals("real") && novoTipo.equals("inteiro"))) {
+                    tipo = "real";
+                } else {
+                    return "";
+                }
+            }
+        }
+
+        return tipo;
+    }
+
+    @Override
+    public String visitTermo(LAParser.TermoContext ctx) {
+        String tipo = visitFator(ctx.first);
+
+        for(LAParser.FatorContext fatorCtx: ctx.rest) {
+            String novoTipo = visitFator(fatorCtx);
+            if(!tipo.equals(novoTipo)) {
+                if((tipo.equals("inteiro") && novoTipo.equals("real"))
+                || (tipo.equals("real") && novoTipo.equals("inteiro"))) {
+                    tipo = "real";
+                } else {
+                    return "";
+                }
+            }
+        }
+
+        return tipo;
+    }
+
+    @Override
+    public String visitExp_aritmetica(LAParser.Exp_aritmeticaContext ctx) {
+        String tipo = visitTermo(ctx.first);
+
+        for(LAParser.TermoContext termoCtx: ctx.rest) {
+            String novoTipo = visitTermo(termoCtx);
+            if(!tipo.equals(novoTipo)) {
+                if((tipo.equals("inteiro") && novoTipo.equals("real"))
+                || (tipo.equals("real") && novoTipo.equals("inteiro"))) {
+                    tipo = "real";
+                } else {
+                    return "";
+                }
+            }
+        }
+
+        return tipo;
+    }
+
+    @Override
+    public String visitExp_relacional(LAParser.Exp_relacionalContext ctx) {
+        String tipo = visitExp_aritmetica(ctx.first);
+
+        if(ctx.second != null) {
+            String novoTipo = visitExp_aritmetica(ctx.second);
+            if(!tipo.equals(novoTipo)) {
+                if((tipo.equals("inteiro") && novoTipo.equals("real"))
+                || (tipo.equals("real") && novoTipo.equals("inteiro"))) {
+                    tipo = "real";
+                } else {
+                    return "";
+                }
+            }
+
+            return "logico";
+        }
+
+        return tipo;
+    }
+
+    @Override
+    public String visitParcela_logica(LAParser.Parcela_logicaContext ctx) {
+        if(ctx.logical != null) {
+            return "logico";
+        } else {
+            return visitExp_relacional(ctx.exp_relacional());
+        }
+    }
+
+    @Override
+    public String visitFator_logico(LAParser.Fator_logicoContext ctx) {
+        return visitParcela_logica(ctx.parcela_logica());
+    }
+
+    @Override
+    public String visitTermo_logico(LAParser.Termo_logicoContext ctx) {
+        String tipo = visitFator_logico(ctx.first);
+
+        for(LAParser.Fator_logicoContext fatorCtx: ctx.rest) {
+            if(!tipo.equals("logico") && !visitFator_logico(fatorCtx).equals("logico")) {
+                return "";
+            }
+        }
+
+        return tipo;
+    }
+
+    @Override
+    public String visitExpressao(LAParser.ExpressaoContext ctx) {
+        String tipo = visitTermo_logico(ctx.first);
+
+        for(LAParser.Termo_logicoContext termoCtx: ctx.rest) {
+            if(!tipo.equals("logico") && !visitTermo_logico(termoCtx).equals("logico")) {
+                return "";
+            }
+        }
+
+        return tipo;
     }
 }

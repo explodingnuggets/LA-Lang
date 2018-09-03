@@ -79,7 +79,7 @@ cmd
     ;
 
 cmdLeia
-    : 'leia' '(' ('^')? first=identificador (',' ('^')? rest=identificador)* ')';
+    : 'leia' '(' ('^')? first=identificador (',' ('^')? rest+=identificador)* ')';
 
 cmdEscreva
     : 'escreva' '(' expressao (',' expressao)* ')';
@@ -124,13 +124,13 @@ op_unario
     : '-';
 
 exp_aritmetica
-    : termo (op1 termo)*;
+    : first=termo (op1 rest+=termo)*;
 
 termo
-    : fator (op2 fator)*;
+    : first=fator (op2 rest+=fator)*;
 
 fator
-    : parcela (op3 parcela)*;
+    : first=parcela (op3 rest+=parcela)*;
 
 op1
     : '+' | '-';
@@ -149,29 +149,29 @@ parcela_unario
     | func=IDENT '(' expressao (',' expressao)* ')'
     | inteiro=NUM_INT
     | real=NUM_REAL
-    | '(' expressao ')'
+    | '(' expr=expressao ')'
     ;
 
 parcela_nao_unario
-    : '&' identificador | CADEIA;
+    : '&' identificador | cadeia=CADEIA;
 
 exp_relacional
-    : exp_aritmetica (op_relacional exp_aritmetica)?;
+    : first=exp_aritmetica (op_relacional second=exp_aritmetica)?;
 
 op_relacional
     : '=' | '<>' | '>=' | '<=' | '>' | '<';
 
 expressao
-    : termo_logico (op_logico_1 termo_logico)*;
+    : first=termo_logico (op_logico_1 rest+=termo_logico)*;
 
 termo_logico
-    : fator_logico (op_logico_2 fator_logico)*;
+    : first=fator_logico (op_logico_2 rest+=fator_logico)*;
 
 fator_logico
     : ('nao')? parcela_logica;
 
 parcela_logica
-    : ('verdadeiro' | 'falso')
+    : logical=('verdadeiro' | 'falso')
     | exp_relacional;
 
 op_logico_1

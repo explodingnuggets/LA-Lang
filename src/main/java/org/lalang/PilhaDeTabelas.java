@@ -1,5 +1,6 @@
 package org.lalang;
 
+import java.util.HashMap;
 import java.util.Stack;
 
 class PilhaDeTabelas {
@@ -38,10 +39,22 @@ class PilhaDeTabelas {
 
         for(TabelaDeSimbolos tabela: this.pilha) {
             simbolo = tabela.encontrarEntrada(nome);
-            if(simbolo != null)
+            if(simbolo != null && simbolo.getTipo().equals("variavel"))
                 return simbolo;
         }
 
+        return null;
+    }
+
+    public EntradaSimbolo encontrarTipo(String nome) {
+        EntradaSimbolo simbolo;
+
+        for(TabelaDeSimbolos tabela: this.pilha) {
+            simbolo = tabela.encontrarEntrada(nome);
+            if(simbolo != null && simbolo.getTipo().equals("tipo"))
+                return simbolo;
+        }
+    
         return null;
     }
 
