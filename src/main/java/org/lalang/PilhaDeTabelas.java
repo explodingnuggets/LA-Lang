@@ -11,7 +11,7 @@ class PilhaDeTabelas {
 
     private PilhaDeTabelas() {
         this.pilha = new Stack<TabelaDeSimbolos>();
-        this.pilha.add(new TabelaDeSimbolos());
+        this.pilha.add(new TabelaDeSimbolos(""));
         this.funcoes = new Hashtable<String, EntradaFuncao>();
     }
 
@@ -26,8 +26,15 @@ class PilhaDeTabelas {
         return PilhaDeTabelas.instancia;
     }
 
+    public TabelaDeSimbolos novaTabela(String tipoRetorno) {
+        TabelaDeSimbolos tabela = new TabelaDeSimbolos(tipoRetorno);
+        this.pilha.add(tabela);
+
+        return tabela;
+    }
+
     public TabelaDeSimbolos novaTabela() {
-        TabelaDeSimbolos tabela = new TabelaDeSimbolos();
+        TabelaDeSimbolos tabela = new TabelaDeSimbolos(this.getTabela().getTipoRetorno());
         this.pilha.add(tabela);
 
         return tabela;

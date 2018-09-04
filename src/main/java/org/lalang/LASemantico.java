@@ -50,6 +50,16 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    @Override
+    public String visitDeclConstante(LAParser.DeclConstanteContext ctx) {
+        String nome = ctx.IDENT().getText();
+        String tipo = ctx.tipo_basico().getText();
+
+        this.pilha.adicionarSimbolo(nome, "variavel", tipo);
+
+        return null;
+    }
+
      @Override
     public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
         // TODO: adicionar tipos no escopo
@@ -117,13 +127,14 @@ class LASemantico extends LABaseVisitor<String> {
 
     @Override
     public String visitCmdLeia(LAParser.CmdLeiaContext ctx){
-        String nome_variavel = ctx.first.getText();
+        String nome_variavel = this.identificadorName(ctx.first);
+
         if( pilha.encontrarVariavel(nome_variavel) == null ){
             this.out.println("Linha " + ctx.start.getLine() + ": identificador " + nome_variavel + " nao declarado");
         }
 
         for(LAParser.IdentificadorContext identCtx: ctx.rest) {
-            nome_variavel = identCtx.getText();
+            nome_variavel = this.identificadorName(identCtx);
 
             if(this.pilha.encontrarVariavel(nome_variavel) == null)
                 this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome_variavel + " nao declarado");
@@ -195,15 +206,12 @@ class LASemantico extends LABaseVisitor<String> {
 
     @Override
     public String visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
-        String nome = ctx.identificador().first.getText();
-
-        for(Token identCtx: ctx.identificador().rest) {
-            nome += "." + identCtx.getText();
-        }
+        String nome = this.identificadorName(ctx.identificador());
 
         EntradaSimbolo simbolo = this.pilha.encontrarVariavel(nome);
         if(simbolo == null) {
-            out.println("Linha " + ctx.identificador().start.getLine() + ": identificador nao declarado");
+            nome += ctx.identificador().dimensao().getText();
+            out.println("Linha " + ctx.identificador().start.getLine() + ": identificador " + nome + " nao declarado");
         } else {
             String tipo = simbolo.getTipoDeDado();
             if(ctx.ptr != null && tipo.charAt(0) == '^') {
@@ -215,8 +223,11 @@ class LASemantico extends LABaseVisitor<String> {
 
             String tipoExpressao = visitExpressao(ctx.expressao());
 
-            if(!tipo.equals(tipoExpressao) && !(tipo.equals("real") && tipoExpressao.equals("inteiro")))
+            if(!tipo.equals(tipoExpressao) && !(tipo.equals("real") && tipoExpressao.equals("inteiro"))) {
+                nome += ctx.identificador().dimensao().getText();
+                
                 this.out.println("Linha " + ctx.identificador().start.getLine() + ": atribuicao nao compativel para " + nome);
+            }
         }
 
         return null;
@@ -242,6 +253,15 @@ class LASemantico extends LABaseVisitor<String> {
             }
         } else {
             this.out.println("Linha " + ctx.start.getLine() + ": incompatibilidade de parametros na chamada de " + nome);
+        }
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdRetorne(LAParser.CmdRetorneContext ctx) {
+        if(this.pilha.getTabela().getTipoRetorno().equals("")) {
+            this.out.println("Linha " + ctx.start.getLine() + ": comando retorne nao permitido nesse escopo");
         }
 
         return null;
@@ -274,7 +294,7 @@ class LASemantico extends LABaseVisitor<String> {
             this.pilha.adicionarFuncao(nome, tipo);
         }
 
-        this.pilha.novaTabela();
+        this.pilha.novaTabela(tipo);
 
         for(EntradaSimbolo simbolo: parametros) {
             this.pilha.adicionarSimbolo(simbolo.getNome(), "variavel", simbolo.getTipoDeDado());

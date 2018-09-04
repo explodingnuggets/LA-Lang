@@ -4,9 +4,11 @@ import java.util.Hashtable;
 
 class TabelaDeSimbolos {
     private Hashtable<String, EntradaSimbolo> tabela;
+    private String tipoRetorno;
 
-    public TabelaDeSimbolos() {
+    public TabelaDeSimbolos(String tipoRetorno) {
         this.tabela = new Hashtable<String, EntradaSimbolo>();
+        this.tipoRetorno = tipoRetorno;
     }
 
     public boolean adicionarEntrada(String nome, String tipo, String tipoDeDado) {
@@ -21,5 +23,9 @@ class TabelaDeSimbolos {
 
     public EntradaSimbolo encontrarEntrada(String nome) {
         return this.tabela.get(nome);
+    }
+
+    public String getTipoRetorno() {
+        return this.tipoRetorno;
     }
 }
