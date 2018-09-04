@@ -1,5 +1,8 @@
 package org.lalang;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -13,6 +16,10 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     public boolean existeTipo(String tipo) {
+        if(tipo.charAt(0) == '^'){
+            tipo = tipo.substring(1);
+        }
+
         if(tipo.equals("literal") || tipo.equals("inteiro") || tipo.equals("real") || tipo.equals("logico") || this.pilha.encontrarTipo(tipo) != null) {
             return true;
         }
@@ -78,18 +85,6 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
-
-    @Override
-    public String visitDeclProcedimento(LAParser.DeclProcedimentoContext ctx) {
-        this.pilha.novaTabela();
-
-        visitChildren(ctx);
-
-        this.pilha.removerTabela();
-
-        return null;
-    }
-
     @Override
     public String visitCmdSe(LAParser.CmdSeContext ctx) {
         /*
@@ -97,6 +92,8 @@ class LASemantico extends LABaseVisitor<String> {
         * códigos onde o caso é verdadeiro, e outro para o caso de senão.
         */
         // Começo do escopo de se
+        visitExpressao(ctx.expressao());
+
         this.pilha.novaTabela();
 
         for(LAParser.CmdContext cmdCtx: ctx.seCmd) {
@@ -209,9 +206,16 @@ class LASemantico extends LABaseVisitor<String> {
             out.println("Linha " + ctx.identificador().start.getLine() + ": identificador nao declarado");
         } else {
             String tipo = simbolo.getTipoDeDado();
+            if(ctx.ptr != null && tipo.charAt(0) == '^') {
+                tipo = tipo.substring(1);
+                nome = "^" + nome;
+
+                System.out.println(tipo);
+            }
+
             String tipoExpressao = visitExpressao(ctx.expressao());
 
-            if(!tipo.equals(tipoExpressao) || (tipo.equals("real") && tipo.equals("inteiro")))
+            if(!tipo.equals(tipoExpressao) && !(tipo.equals("real") && tipoExpressao.equals("inteiro")))
                 this.out.println("Linha " + ctx.identificador().start.getLine() + ": atribuicao nao compativel para " + nome);
         }
 
@@ -219,10 +223,62 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
-    public String visitDeclFuncao(LAParser.DeclFuncaoContext ctx) {
-        // TODO: inserir função no escopo global
+    public String visitCmdChamada(LAParser.CmdChamadaContext ctx) {
+        String nome = ctx.IDENT().getText();
+        List<EntradaSimbolo> parametros = this.pilha.encontrarFuncao(nome).getParametros();
+        List<String> tipos = new ArrayList<String>();
+
+        for(LAParser.ExpressaoContext expCtx: ctx.expressao()) {
+            tipos.add(visitExpressao(expCtx));
+        }
+
+        if(parametros.size() == tipos.size()) {
+            for(int i = 0; i < parametros.size(); i++) {
+                if(!parametros.get(i).getTipo().equals(tipos.get(i))) {
+                    this.out.println("Linha " + ctx.start.getLine() + ": incompatibilidade de parametros na chamada de " + nome);
+
+                    break;
+                }
+            }
+        } else {
+            this.out.println("Linha " + ctx.start.getLine() + ": incompatibilidade de parametros na chamada de " + nome);
+        }
+
+        return null;
+    }
+
+    @Override
+    public String visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
+        String nome = ctx.IDENT().getText();
+        String tipo;
+        if(ctx.type != null) {
+            tipo = ctx.type.getText();
+        } else {
+            tipo = "";
+        }
+
+        List<EntradaSimbolo> parametros = new ArrayList<EntradaSimbolo>();
+        if(ctx.parametros() != null) {
+            for(LAParser.ParametroContext parCtx: ctx.parametros().parametro()) {
+                String tipoPar = parCtx.tipo_estendido().getText();
+
+                for(LAParser.IdentificadorContext identCtx: parCtx.identificador()) {
+                    String nomePar = this.identificadorName(identCtx);
+
+                    parametros.add(new EntradaSimbolo(nomePar, "variavel", tipoPar));
+                }
+            }
+
+            this.pilha.adicionarFuncao(nome, tipo, parametros);
+        } else {
+            this.pilha.adicionarFuncao(nome, tipo);
+        }
 
         this.pilha.novaTabela();
+
+        for(EntradaSimbolo simbolo: parametros) {
+            this.pilha.adicionarSimbolo(simbolo.getNome(), "variavel", simbolo.getTipoDeDado());
+        }
 
         visitChildren(ctx);
 
@@ -288,9 +344,27 @@ class LASemantico extends LABaseVisitor<String> {
                 return simbolo.getTipoDeDado();
             }
         } else if(ctx.func != null) {
-            // TODO: retornar tipo de função
+            String nome = ctx.IDENT().getText();
+            EntradaFuncao funcao = this.pilha.encontrarFuncao(nome);
+            List<String> tipos = new ArrayList<String>();
 
-            return "";
+            for(LAParser.ExpressaoContext expCtx: ctx.expressao()) {
+                tipos.add(visitExpressao(expCtx));
+            }
+
+            if(funcao.getParametros().size() == tipos.size()) {
+                for(int i = 0; i < tipos.size(); i++) {
+                    if(!funcao.getParametros().get(i).getTipoDeDado().equals(tipos.get(i))) {
+                        this.out.println("Linha " + ctx.start.getLine() + ": incompatibilidade de parametros na chamada de " + nome);
+
+                        break;
+                    }
+                }
+            } else {
+                this.out.println("Linha " + ctx.start.getLine() + ": incompatibilidade de parametros na chamada de " + nome);
+            }
+
+            return funcao.getTipoRetorno();
         } else if(ctx.inteiro != null) {
             return "inteiro";
         } else if(ctx.real != null) {
@@ -313,7 +387,7 @@ class LASemantico extends LABaseVisitor<String> {
             if(simbolo == null) {
                 this.out.println("Linha " + ctx.identificador().start.getLine() + ": identificador " + nome + " nao declarado");
             } else {
-                return "&" + simbolo.getTipoDeDado();
+                return "^" + simbolo.getTipoDeDado();
             }
         }
 

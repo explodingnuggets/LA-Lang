@@ -52,8 +52,8 @@ registro
     : 'registro' (variavel)* 'fim_registro';
 
 declaracao_global
-    : 'procedimento' IDENT '(' (parametros)? ')' (declaracao_local)* (cmd)* 'fim_procedimento'          #declProcedimento
-    | 'funcao' IDENT '(' (parametros)? ')' ':' tipo_estendido (declaracao_local)* (cmd)* 'fim_funcao'   #declFuncao
+    : 'procedimento' IDENT '(' (parametros)? ')' (declaracao_local)* (cmd)* 'fim_procedimento'
+    | 'funcao' IDENT '(' (parametros)? ')' ':' type=tipo_estendido (declaracao_local)* (cmd)* 'fim_funcao'
     ;
 
 parametro
@@ -100,7 +100,7 @@ cmdFaca
     : 'faca' (cmd)* 'ate' expressao;
 
 cmdAtribuicao
-    : ('^')? identificador '<-' expressao;
+    : (ptr='^')? identificador '<-' expressao;
 
 cmdChamada
     : IDENT '(' expressao (',' expressao)* ')';

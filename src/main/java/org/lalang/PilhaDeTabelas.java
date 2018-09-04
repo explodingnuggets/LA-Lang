@@ -1,15 +1,18 @@
 package org.lalang;
 
-import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Stack;
 
 class PilhaDeTabelas {
     private static PilhaDeTabelas instancia;
     private Stack<TabelaDeSimbolos> pilha;
+    private Hashtable<String, EntradaFuncao> funcoes;
 
     private PilhaDeTabelas() {
         this.pilha = new Stack<TabelaDeSimbolos>();
         this.pilha.add(new TabelaDeSimbolos());
+        this.funcoes = new Hashtable<String, EntradaFuncao>();
     }
 
     /*
@@ -64,5 +67,29 @@ class PilhaDeTabelas {
 
     public void removerTabela() {
         this.pilha.pop();
+    }
+
+    public boolean adicionarFuncao(String nome, String tipoRetorno) {
+        if(this.funcoes.get(nome) == null) {
+            this.funcoes.put(nome, new EntradaFuncao(nome, tipoRetorno));
+
+            return true;
+        }
+    
+        return false;
+    }
+
+    public boolean adicionarFuncao(String nome, String tipoRetorno, List<EntradaSimbolo> parametros) {
+        if(this.funcoes.get(nome) == null) {
+            this.funcoes.put(nome, new EntradaFuncao(nome, tipoRetorno, parametros));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public EntradaFuncao encontrarFuncao(String nome) {
+        return this.funcoes.get(nome);
     }
 }
