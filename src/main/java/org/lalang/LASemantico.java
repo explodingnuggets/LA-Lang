@@ -27,6 +27,39 @@ class LASemantico extends LABaseVisitor<String> {
         return false;
     }
 
+    public void declareRegistro(LAParser.RegistroContext ctx, String prefix) {
+        for(LAParser.VariavelContext varCtx: ctx.variavel()) {
+            for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
+                String nome = prefix + "." + this.identificadorName(identCtx);
+
+                if(varCtx.tipo().registro() == null) {
+                    if(!this.pilha.adicionarSimbolo(nome, "variavel", varCtx.tipo().getText()))
+                    this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                } else {
+                    if(this.pilha.encontrarVariavel(nome) != null) {
+                        this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                    } else {    
+                        this.declareRegistro(varCtx.tipo().registro(), nome);
+                    }
+                }
+            }
+        }
+    }
+
+    public void tipoRegistro(LAParser.RegistroContext ctx, String prefix, List<EntradaSimbolo> campos) {
+        for(LAParser.VariavelContext varCtx: ctx.variavel()) {
+            for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
+                String nome = prefix + this.identificadorName(identCtx);
+
+                if(varCtx.tipo().registro() == null) {
+                    campos.add(new EntradaSimbolo(nome, "variavel", varCtx.tipo().getText()));
+                } else {
+                    this.tipoRegistro(varCtx.tipo().registro(), nome + ".", campos);
+                }
+            }
+        }
+    }
+
     @Override
     public String visitPrograma(LAParser.ProgramaContext ctx) {
         visitDeclaracoes(ctx.declaracoes());
@@ -60,9 +93,18 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
-     @Override
+    @Override
     public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
-        // TODO: adicionar tipos no escopo
+        String nome = ctx.IDENT().getText();
+        List<EntradaSimbolo> campos = new ArrayList<EntradaSimbolo>();
+
+        if(ctx.tipo().registro() == null) {
+            campos.add(new EntradaSimbolo("", "variavel", ctx.tipo().getText()));
+        } else {
+            this.tipoRegistro(ctx.tipo().registro(), "", campos);
+        }
+
+        this.pilha.adicionarTipo(nome, campos);
 
         return null;
     }
@@ -313,13 +355,32 @@ class LASemantico extends LABaseVisitor<String> {
             String nome = this.identificadorName(identCtx);
 
             if(ctx.variavel().tipo().registro() == null) {
-                if(!this.pilha.adicionarSimbolo(nome, "variavel" ,ctx.variavel().tipo().getText()))
-                    this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                if(ctx.variavel().tipo().tipo_estendido().tipo_basico_ident().tipo_basico() != null) {
+                    if(!this.pilha.adicionarSimbolo(nome, "variavel" ,ctx.variavel().tipo().getText()))
+                        this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                } else {
+                    String tipoNome = ctx.variavel().tipo().tipo_estendido().tipo_basico_ident().IDENT().getText();
+                    EntradaTipo tipo = this.pilha.encontrarTipo(tipoNome);
+                    
+                    if(this.pilha.adicionarSimbolo(nome, "variavel", tipoNome)) {
+                        if(tipo != null) {
+                            for(EntradaSimbolo campo: tipo.getCampos()) {
+                                this.pilha.adicionarSimbolo(nome + "." + campo.getNome(), "variavel", campo.getTipoDeDado());
+                            }
+                        }
+                    } else {
+                        this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                    }
+                }
 
                 if(!this.existeTipo(ctx.variavel().tipo().getText()))
                     this.out.println("Linha " + ctx.variavel().tipo().start.getLine() + ": tipo " + ctx.variavel().tipo().getText() + " nao declarado");
             } else {
-                this.declRegistro(ctx.variavel().tipo().registro(), nome);
+                if(this.pilha.encontrarVariavel(nome) != null) {
+                    this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                } else {
+                    this.declareRegistro(ctx.variavel().tipo().registro(), nome);
+                }
             }
         }
 
@@ -335,21 +396,6 @@ class LASemantico extends LABaseVisitor<String> {
         }
 
         return nome;
-    }
-
-    public void declRegistro(LAParser.RegistroContext ctx, String prefix) {
-        for(LAParser.VariavelContext varCtx: ctx.variavel()) {
-            for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
-                String nome = this.identificadorName(identCtx);
-
-                System.out.println(prefix + "." + nome + ": " + varCtx.tipo().getText());
-                if(varCtx.tipo().registro() == null) {
-                    //this.pilha.adicionarSimbolo(prefix + "." + nome, varCtx.tipo().getText());
-                } else {
-                    this.declRegistro(varCtx.tipo().registro(), prefix + "." + nome);
-                }
-            }
-        }
     }
 
     @Override

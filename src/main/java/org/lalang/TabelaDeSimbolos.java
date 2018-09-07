@@ -1,5 +1,6 @@
 package org.lalang;
 
+import java.util.Collection;
 import java.util.Hashtable;
 
 class TabelaDeSimbolos {
@@ -27,5 +28,9 @@ class TabelaDeSimbolos {
 
     public String getTipoRetorno() {
         return this.tipoRetorno;
+    }
+
+    public Collection<EntradaSimbolo> getSimbolos() {
+        return this.tabela.values();
     }
 }

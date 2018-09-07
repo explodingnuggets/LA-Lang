@@ -8,11 +8,13 @@ class PilhaDeTabelas {
     private static PilhaDeTabelas instancia;
     private Stack<TabelaDeSimbolos> pilha;
     private Hashtable<String, EntradaFuncao> funcoes;
+    private Hashtable<String, EntradaTipo> tipos;
 
     private PilhaDeTabelas() {
         this.pilha = new Stack<TabelaDeSimbolos>();
         this.pilha.add(new TabelaDeSimbolos(""));
         this.funcoes = new Hashtable<String, EntradaFuncao>();
+        this.tipos = new Hashtable<String, EntradaTipo>();
     }
 
     /*
@@ -56,18 +58,6 @@ class PilhaDeTabelas {
         return null;
     }
 
-    public EntradaSimbolo encontrarTipo(String nome) {
-        EntradaSimbolo simbolo;
-
-        for(TabelaDeSimbolos tabela: this.pilha) {
-            simbolo = tabela.encontrarEntrada(nome);
-            if(simbolo != null && simbolo.getTipo().equals("tipo"))
-                return simbolo;
-        }
-    
-        return null;
-    }
-
     public TabelaDeSimbolos getTabela() {
         return this.pilha.peek();
     }
@@ -98,5 +88,19 @@ class PilhaDeTabelas {
 
     public EntradaFuncao encontrarFuncao(String nome) {
         return this.funcoes.get(nome);
+    }
+
+    public boolean adicionarTipo(String nome, List<EntradaSimbolo> campos) {
+        if(this.adicionarSimbolo(nome, "tipo", "")) {
+            this.tipos.put(nome, new EntradaTipo(nome, campos));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public EntradaTipo encontrarTipo(String nome) {
+        return this.tipos.get(nome);
     }
 }
