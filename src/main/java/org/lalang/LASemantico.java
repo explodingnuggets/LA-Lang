@@ -320,36 +320,35 @@ class LASemantico extends LABaseVisitor<String> {
             tipo = "";
         }
 
-        this.pilha.novaTabela(tipo);
-
         List<EntradaSimbolo> parametros = new ArrayList<EntradaSimbolo>();
         if(ctx.parametros() != null) {
             for(LAParser.ParametroContext parCtx: ctx.parametros().parametro()) {
                 String tipoPar = parCtx.tipo_estendido().getText();
-                EntradaTipo tipoEntrada = null;
-
-                if(parCtx.tipo_estendido().tipo_basico_ident().tipo_basico() == null) {
-                    tipoEntrada = this.pilha.encontrarTipo(tipoPar);
-                }
 
                 for(LAParser.IdentificadorContext identCtx: parCtx.identificador()) {
                     String nomePar = this.identificadorName(identCtx);
 
                     parametros.add(new EntradaSimbolo(nomePar, "variavel", tipoPar));
-
-                    this.pilha.adicionarSimbolo(nomePar, "variavel", tipoPar);
-
-                    if(tipoEntrada != null) {
-                        for(EntradaSimbolo campo: tipoEntrada.getCampos()) {
-                            this.pilha.adicionarSimbolo(nomePar + "." + campo.getNome(), "variavel", campo.getTipoDeDado());
-                        }
-                    }
                 }
             }
 
             this.pilha.adicionarFuncao(nome, tipo, parametros);
         } else {
             this.pilha.adicionarFuncao(nome, tipo);
+        }
+
+        this.pilha.novaTabela(tipo);
+
+        for(EntradaSimbolo simbolo: parametros) {
+            EntradaTipo tipoEntrada = this.pilha.encontrarTipo(simbolo.getTipoDeDado());
+
+            this.pilha.adicionarSimbolo(simbolo.getNome(), simbolo.getTipo(), simbolo.getTipoDeDado());
+
+            if(tipoEntrada != null) {
+                for(EntradaSimbolo campo: tipoEntrada.getCampos()) {
+                    this.pilha.adicionarSimbolo(simbolo.getNome() + "." + campo.getNome(), "variavel", campo.getTipoDeDado());
+                }
+            }
         }
 
         visitChildren(ctx);

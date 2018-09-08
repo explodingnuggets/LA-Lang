@@ -43,16 +43,30 @@ class PilhaDeTabelas {
     }
 
     public boolean adicionarSimbolo(String nome, String tipo, String tipoDeDado) {
-        return this.getTabela().adicionarEntrada(nome, tipo, tipoDeDado);
+        if(this.encontrarSimbolo(nome) == null) {
+            return this.getTabela().adicionarEntrada(nome, tipo, tipoDeDado);
+        } else {
+            return false;
+        }
     }
 
-    public EntradaSimbolo encontrarVariavel(String nome) {
+    public EntradaSimbolo encontrarSimbolo(String nome) {
         EntradaSimbolo simbolo;
 
         for(TabelaDeSimbolos tabela: this.pilha) {
             simbolo = tabela.encontrarEntrada(nome);
-            if(simbolo != null && simbolo.getTipo().equals("variavel"))
+            if(simbolo != null)
                 return simbolo;
+        }
+
+        return null;
+    }
+
+    public EntradaSimbolo encontrarVariavel(String nome) {
+        EntradaSimbolo simbolo = this.encontrarSimbolo(nome);
+
+        if(simbolo != null && simbolo.getTipo().equals("variavel")) {
+            return simbolo;
         }
 
         return null;
@@ -67,7 +81,7 @@ class PilhaDeTabelas {
     }
 
     public boolean adicionarFuncao(String nome, String tipoRetorno) {
-        if(this.funcoes.get(nome) == null) {
+        if(this.adicionarSimbolo(nome, "funcao", tipoRetorno)) {
             this.funcoes.put(nome, new EntradaFuncao(nome, tipoRetorno));
 
             return true;
@@ -77,7 +91,7 @@ class PilhaDeTabelas {
     }
 
     public boolean adicionarFuncao(String nome, String tipoRetorno, List<EntradaSimbolo> parametros) {
-        if(this.funcoes.get(nome) == null) {
+        if(this.adicionarSimbolo(nome, "funcao", tipoRetorno)) {
             this.funcoes.put(nome, new EntradaFuncao(nome, tipoRetorno, parametros));
 
             return true;
