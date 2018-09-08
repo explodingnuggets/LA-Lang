@@ -1,27 +1,20 @@
 package org.lalang;
 
+import java.util.Collection;
 import java.util.Hashtable;
 
 class TabelaDeSimbolos {
     private Hashtable<String, EntradaSimbolo> tabela;
+    private String tipoRetorno;
 
-    public TabelaDeSimbolos() {
+    public TabelaDeSimbolos(String tipoRetorno) {
         this.tabela = new Hashtable<String, EntradaSimbolo>();
+        this.tipoRetorno = tipoRetorno;
     }
 
-    public boolean adicionarEntrada(String nome, TipoDeDado tipo) {
+    public boolean adicionarEntrada(String nome, String tipo, String tipoDeDado) {
         if(this.tabela.get(nome) == null) {
-            this.tabela.put(nome, new EntradaSimbolo(nome, tipo));
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean adicionarEntrada(String nome, TipoDeDado tipo, String valor) {
-        if(this.adicionarEntrada(nome, tipo)) {
-            this.encontrarEntrada(nome).setValor(valor);
+            this.tabela.put(nome, new EntradaSimbolo(nome, tipo, tipoDeDado));
 
             return true;
         }
@@ -31,5 +24,13 @@ class TabelaDeSimbolos {
 
     public EntradaSimbolo encontrarEntrada(String nome) {
         return this.tabela.get(nome);
+    }
+
+    public String getTipoRetorno() {
+        return this.tipoRetorno;
+    }
+
+    public Collection<EntradaSimbolo> getSimbolos() {
+        return this.tabela.values();
     }
 }

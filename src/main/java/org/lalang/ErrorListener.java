@@ -11,18 +11,29 @@ import org.antlr.v4.runtime.dfa.DFA;
 
 public class ErrorListener implements ANTLRErrorListener {
 
-	StringBuffer content;
+	public static ErrorBuffer out;
 
-    public ErrorListener(StringBuffer content) {
-		this.content = content;
+    public ErrorListener(ErrorBuffer out) {
+		this.out = out;
     }
 
     @Override
     public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        Token token = (Token)offendingSymbol;
-
-        content.append("Linha " + line + ": erro sintatico proximo a " + token.getText());
-    }
+		Token token = (Token)offendingSymbol;
+		if(!out.modified()) {
+			if(token.getType() == LALexer.ERRO) {
+				if(token.getText().equals("{"))
+					out.println("Linha " + (line+1) + ": comentario nao fechado");
+				else
+					out.println("Linha " + line + ": " + token.getText() + " - simbolo nao identificado");
+			} else {
+				if(token.getText() == "<EOF>")
+					out.println("Linha " + line + ": " + "erro sintatico proximo a EOF");
+				else
+					out.println("Linha " + line + ": " + "erro sintatico proximo a " + token.getText());
+			}
+		}
+	}
 
 	@Override
 	public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact,

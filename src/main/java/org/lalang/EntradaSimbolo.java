@@ -2,33 +2,24 @@ package org.lalang;
 
 class EntradaSimbolo {
     private String nome;
-    private TipoDeDado tipo;
-    private String valor;
+    private String tipo;
+    private String tipoDeDado;
 
-    public EntradaSimbolo(String nome, TipoDeDado tipo) {
+    public EntradaSimbolo(String nome, String tipo, String tipoDeDado) {
         this.nome = nome;
         this.tipo = tipo;
-    }
-
-    public EntradaSimbolo(String nome, TipoDeDado tipo, String valor) {
-        this.nome = nome;
-        this.tipo = tipo;
-        this.valor = valor;
+        this.tipoDeDado = tipoDeDado;
     }
 
     public String getNome() {
         return this.nome;
     }
 
-    public TipoDeDado getTipo() {
+    public String getTipo() {
         return this.tipo;
     }
 
-    public String getValor() {
-        return this.valor;
-    }
-
-    public void setValor(String valor) {
-        this.valor = valor;
+    public String getTipoDeDado() {
+        return this.tipoDeDado;
     }
 }
