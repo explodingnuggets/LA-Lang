@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 class LAMain {
     public static void main(String[] args){
@@ -43,6 +44,11 @@ class LAMain {
                 if(!error_out.modified()) {
                     LASemantico semantico = new LASemantico(error_out);
                     semantico.visitPrograma(ast);
+                }
+
+                if(!error_out.modified()) {
+                    LAGeracao geracao = new LAGeracao(out);
+                    ParseTreeWalker.DEFAULT.walk(geracao, ast);
                 }
 
                 // Se foram passados dois argumentos, o segundo será tratado como
