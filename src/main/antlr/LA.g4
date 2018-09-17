@@ -43,7 +43,7 @@ tipo_basico_ident
     : tipo_basico | IDENT;
 
 tipo_estendido
-    : ('^')? tipo_basico_ident;
+    : (pointer='^')? tipo_basico_ident;
 
 valor_constante
     : CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso';
@@ -79,7 +79,7 @@ cmd
     ;
 
 cmdLeia
-    : 'leia' '(' ('^')? first=identificador (',' ('^')? rest+=identificador)* ')';
+    : 'leia' '(' (pointerFirst='^')? first=identificador (',' (pointerRest+='^')? rest+=identificador)* ')';
 
 cmdEscreva
     : 'escreva' '(' expressao (',' expressao)* ')';
