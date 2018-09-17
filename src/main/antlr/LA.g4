@@ -25,7 +25,7 @@ declaracao_local
     ;
 
 variavel
-    : identificador (',' identificador)* ':' tipo;
+    : first=identificador (',' rest+=identificador)* ':' tipo;
 
 identificador
     : first=IDENT ('.' rest+=IDENT)* dimensao;

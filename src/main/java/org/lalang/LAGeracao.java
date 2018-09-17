@@ -63,6 +63,22 @@ class LAGeracao extends LABaseListener {
         }
     }
 
+    public String getTipo(String tipo) {
+        if(tipo=="inteiro"){
+            return "int";
+        }
+        else if(tipo=="literal"){
+            return "string";
+        }
+        else if(tipo=="real"){
+            return "float";
+        }
+        else if(tipo=="logico"){
+            return "int";
+        }
+        return null;
+    }
+
     @Override
     public void enterPrograma(LAParser.ProgramaContext ctx) {
         this.out.append("#include <stdio.h>\n");
@@ -71,7 +87,7 @@ class LAGeracao extends LABaseListener {
 
     @Override
     public void exitPrograma(LAParser.ProgramaContext ctx) {
-        this.out.append("}");
+        this.out.append("return 0;\n}");
     }
 
     @Override
@@ -81,44 +97,12 @@ class LAGeracao extends LABaseListener {
 
     @Override
     public void enterDeclVariavel(LAParser.DeclVariavelContext ctx) {
-        if(ctx.variavel().tipo().registro() == null) {
-            String variavelTipo = this.parseTipoEstendido(ctx.variavel().tipo().tipo_estendido());
-
-            for(LAParser.IdentificadorContext identCtx: ctx.variavel().identificador()) {
-                String variavelNome = this.parseIdentificador(identCtx);
-                
-                this.pilha.adicionarSimbolo(variavelNome, "variavel", variavelTipo);
-                this.out.append(variavelTipo + " " + variavelNome + ";\n");
-            }
-        }
+        this.out.append(getTipo(ctx.variavel().tipo().getText())+ " " + ctx.variavel().first.getText()+";\n");
     }
 
-    @Override
+    
+    @Override 
     public void enterCmdLeia(LAParser.CmdLeiaContext ctx) {
-        this.out.append("scanf(\"");
-        List<String> variaveis = new ArrayList<String>();
-        
-        String nome = this.parseIdentificador(ctx.first);
-        String tipo = this.pilha.encontrarVariavel(nome).getTipoDeDado();
-        
-        variaveis.add(nome);
-        this.out.append(this.typeToCPrintf(tipo));
 
-        this.out.append("\"");
-        for(String variavel: variaveis) {
-            this.out.append(",&" + variavel);
-        }
-
-        this.out.append(");\n");
-    }
-
-    @Override
-    public void enterCmdEscreva(LAParser.CmdEscrevaContext ctx) {
-        this.out.append("printf(\"");
-        List<String> expressoes = new ArrayList<String>();
-
-        
-
-        this.out.append(");\n");
     }
 }
