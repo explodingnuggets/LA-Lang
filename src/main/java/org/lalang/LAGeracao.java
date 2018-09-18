@@ -66,7 +66,7 @@ class LAGeracao extends LABaseVisitor<String> {
     }
 
     public String exprToCExpr(String expr) {
-        return expr.replaceAll("(?<![<>])=", "==");
+        return expr.replaceAll("(?<![<>])=", "==").replaceAll("nao", "!");
     }
 
     public String tipoParcelaUnario(LAParser.Parcela_unarioContext ctx) {
@@ -284,6 +284,19 @@ class LAGeracao extends LABaseVisitor<String> {
         }
 
         this.out.append("}\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdFaca(LAParser.CmdFacaContext ctx) {
+        this.out.append("do {\n");
+
+        for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
+            this.visitCmd(cmdCtx);
+        }
+
+        this.out.append("} while(" + this.exprToCExpr(ctx.expressao().getText()) + ");\n");
 
         return null;
     }
