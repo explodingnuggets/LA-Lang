@@ -186,19 +186,22 @@ class LAGeracao extends LABaseVisitor<String> {
     @Override
     public String visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
         String nome = ctx.IDENT().getText();
+        String tipo = (ctx.type == null)?"void":this.typeToCFormat(ctx.type.getText());
+
+        this.pilha.adicionarFuncao(nome, tipo);
 
         this.pilha.novaTabela();
-        if(ctx.type == null) {
-            this.out.append("void " + nome + "(");
 
-            this.parseParametros(ctx.parametros());
+        this.out.append(tipo + " " + nome + "(");
 
-            this.out.append(") {\n");
+        this.parseParametros(ctx.parametros());
 
-            this.visitChildren(ctx);
+        this.out.append(") {\n");
 
-            this.out.append("}\n");
-        }
+        this.visitChildren(ctx);
+
+        this.out.append("}\n");
+
         this.pilha.removerTabela();
 
         return null;
@@ -349,6 +352,13 @@ class LAGeracao extends LABaseVisitor<String> {
     @Override
     public String visitCmdChamada(LAParser.CmdChamadaContext ctx) {
         this.out.append(ctx.getText() + ";\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdRetorne(LAParser.CmdRetorneContext ctx) {
+        this.out.append("return " + this.exprToCExpr(ctx.expressao().getText()) + ";\n");
 
         return null;
     }
