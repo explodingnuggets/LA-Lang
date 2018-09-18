@@ -66,7 +66,7 @@ class LAGeracao extends LABaseVisitor<String> {
     }
 
     public String exprToCExpr(String expr) {
-        return expr.replaceAll("=", "==");
+        return expr.replaceAll("(?<![<>])=", "==");
     }
 
     public String tipoParcelaUnario(LAParser.Parcela_unarioContext ctx) {
@@ -265,6 +265,19 @@ class LAGeracao extends LABaseVisitor<String> {
         String nome = ctx.IDENT().getText();
 
         this.out.append("for(int " + nome + "=" + ctx.from.getText() + ";" + nome + "<=" + ctx.to.getText() + ";" + nome + "++) {\n");
+
+        for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
+            this.visitCmd(cmdCtx);
+        }
+
+        this.out.append("}\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdEnquanto(LAParser.CmdEnquantoContext ctx) {
+        this.out.append("while(" + this.exprToCExpr(ctx.expressao().getText()) + ") {\n");
 
         for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
             this.visitCmd(cmdCtx);
