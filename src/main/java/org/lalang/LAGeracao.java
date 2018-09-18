@@ -39,12 +39,20 @@ class LAGeracao extends LABaseVisitor<String> {
         switch(tipo) {
             case "inteiro":
                 return "int";
+            case "^inteiro":
+                return "int*";
             case "real":
                 return "float";
+            case "^real":
+                return "float*";
             case "literal":
                 return "char";
+            case "^literal":
+                return "char*";
             case "logico":
                 return "int";
+            case "^logico":
+                return "int*";
             default:
                 return tipo;
         }
@@ -233,6 +241,7 @@ class LAGeracao extends LABaseVisitor<String> {
     @Override
     public String visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
         String nome = this.parseIdentificador(ctx.identificador());
+        nome = (ctx.ptr == null)?nome:"*"+nome;
 
         this.out.append(nome + "=" + this.exprToCExpr(ctx.expressao().getText()) + ";\n");
 
