@@ -88,7 +88,7 @@ cmdSe
     : 'se' expressao 'entao' (seCmd+=cmd)* ('senao' (senaoCmd+=cmd)*)? 'fim_se';
 
 cmdCaso
-    : 'caso' exp_aritmetica 'seja' selecao ('senao' (cmd)*)? 'fim_caso';
+    : 'caso' exp_aritmetica 'seja' selecao ('senao' (senaoCmd+=cmd)*)? 'fim_caso';
 
 cmdPara
     : 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' (cmd)* 'fim_para';
@@ -118,7 +118,7 @@ constantes
     : numero_intervalo (',' numero_intervalo)*;
 
 numero_intervalo
-    : (op_unario)? NUM_INT ('..' (op_unario)? NUM_INT)?;
+    : (first_neg=op_unario)? first=NUM_INT ('..' (second_neg=op_unario)? second=NUM_INT)?;
 
 op_unario
     : '-';

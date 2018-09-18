@@ -181,6 +181,13 @@ class LAGeracao extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitDeclConstante(LAParser.DeclConstanteContext ctx) {
+        this.out.append("#define " + ctx.IDENT().getText() + " " + ctx.valor_constante().getText() + "\n");
+
+        return null;
+    }
+
+    @Override
     public String visitCmdLeia(LAParser.CmdLeiaContext ctx) {
         this.out.append("scanf(\"");
         List<String> variaveis = new ArrayList<String>();
@@ -249,6 +256,56 @@ class LAGeracao extends LABaseVisitor<String> {
         }
 
         this.out.append("}\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdCaso(LAParser.CmdCasoContext ctx) {
+        this.out.append("switch(" + this.exprToCExpr(ctx.exp_aritmetica().getText()) + ") {\n");
+
+        visitSelecao(ctx.selecao());
+
+        if(ctx.senaoCmd != null) {
+            this.out.append("default:\n");
+
+            for(LAParser.CmdContext cmdCtx: ctx.senaoCmd) {
+                this.visitCmd(cmdCtx);
+            }
+        }
+
+        this.out.append("}\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitItem_selecao(LAParser.Item_selecaoContext ctx) {
+        visitConstantes(ctx.constantes());
+
+        for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
+            this.visitCmd(cmdCtx);
+        }
+
+        this.out.append("break;\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitNumero_intervalo(LAParser.Numero_intervaloContext ctx) {
+        int first = Integer.parseInt(ctx.first.getText());
+        first = (ctx.first_neg == null)?first:-first;
+        int second = first;
+
+        if(ctx.second != null) {
+            second = Integer.parseInt(ctx.second.getText());
+            second = (ctx.second_neg == null)?second:-second;
+        }
+
+        for(int i = first; i <= second; i++) {
+            this.out.append("case " + i + ":\n");
+        }
 
         return null;
     }
