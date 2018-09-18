@@ -58,9 +58,86 @@ class LAGeracao extends LABaseListener {
                 return "%f";
             case "char":
                 return "%s";
+            case "char*":
+                return "%s";
             default:
                 return "";
         }
+    }
+
+    public String tipoParcelaUnario(LAParser.Parcela_unarioContext ctx) {
+        if(ctx.var != null) {
+            return this.pilha.encontrarVariavel(ctx.var.getText()).getTipoDeDado();
+        } else if(ctx.func != null) {
+            return this.pilha.encontrarFuncao(ctx.func.getText()).getTipoRetorno();
+        } else if(ctx.inteiro != null) {
+            return "int";
+        } else if(ctx.real != null) {
+            return "float";
+        } else {
+            return this.tipoExpressao(ctx.expr);
+        }
+    }
+
+    public String tipoParcelaNaoUnario(LAParser.Parcela_nao_unarioContext ctx) {
+        if(ctx.cadeia != null) {
+            return "char*";
+        } else {
+            String nome = this.parseIdentificador(ctx.identificador());
+            return "&" + this.pilha.encontrarVariavel(nome).getTipoDeDado();
+        }
+    }
+
+    public String tipoParcela(LAParser.ParcelaContext ctx) {
+        if(ctx.parcela_unario() != null) {
+            return this.tipoParcelaUnario(ctx.parcela_unario());
+        } else {
+            return this.tipoParcelaNaoUnario(ctx.parcela_nao_unario());
+        }
+    }
+
+    public String tipoFator(LAParser.FatorContext ctx) {
+        String tipo = this.tipoParcela(ctx.first);
+
+        return tipo;
+    }
+
+    public String tipoTermo(LAParser.TermoContext ctx) {
+        String tipo = this.tipoFator(ctx.first);
+
+        return tipo;
+    }
+
+    public String tipoExpAritmetica(LAParser.Exp_aritmeticaContext ctx) {
+        String tipo = this.tipoTermo(ctx.first);
+
+        return tipo;
+    }
+
+    public String tipoExpRelacional(LAParser.Exp_relacionalContext ctx) {
+        String tipo = this.tipoExpAritmetica(ctx.first);
+
+        return tipo;
+    }
+
+    public String tipoParcelaLogica(LAParser.Parcela_logicaContext ctx) {
+        if(ctx.logical != null) {
+            return "int";
+        } else {
+            return this.tipoExpRelacional(ctx.exp_relacional());
+        }
+    }
+
+    public String tipoFatorLogico(LAParser.Fator_logicoContext ctx) {
+        return this.tipoParcelaLogica(ctx.parcela_logica());
+    }
+
+    public String tipoTermoLogico(LAParser.Termo_logicoContext ctx) {
+        return this.tipoFatorLogico(ctx.first);
+    }
+
+    public String tipoExpressao(LAParser.ExpressaoContext ctx) {
+        return this.tipoTermoLogico(ctx.first);
     }
 
     @Override
@@ -121,11 +198,12 @@ class LAGeracao extends LABaseListener {
         this.out.append("printf(\"");
         List<String> expressoes = new ArrayList<String>();
 
-        String nome=this.parseIdentificador(ctx.first.first.first.parcela_logica().exp_relacional().first.first.first.first.parcela_unario().var);
-        String tipo = this.pilha.encontrarVariavel(nome).getTipoDeDado();
+        for(LAParser.ExpressaoContext exprCtx: ctx.expressao()) {
+            expressoes.add(exprCtx.getText());
+            String tipo = this.tipoExpressao(exprCtx);
 
-        expressoes.add(nome);
-        this.out.append(this.typeToCPrintf(tipo));
+            this.out.append(this.typeToCPrintf(tipo));
+        }
 
         this.out.append("\"");
         for(String expressao:expressoes) {
