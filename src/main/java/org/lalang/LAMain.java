@@ -48,7 +48,7 @@ class LAMain {
 
                 if(!error_out.modified()) {
                     LAGeracao geracao = new LAGeracao(out);
-                    ParseTreeWalker.DEFAULT.walk(geracao, ast);
+                    geracao.visitPrograma(ast);
                 }
 
                 // Se foram passados dois argumentos, o segundo será tratado como

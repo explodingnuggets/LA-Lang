@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-class LAGeracao extends LABaseListener {
+class LAGeracao extends LABaseVisitor<String> {
     private StringBuffer out;
     private PilhaDeTabelas pilha;
 
@@ -141,23 +141,23 @@ class LAGeracao extends LABaseListener {
     }
 
     @Override
-    public void enterPrograma(LAParser.ProgramaContext ctx) {
+    public String visitPrograma(LAParser.ProgramaContext ctx) {
         this.out.append("#include <stdio.h>\n");
         this.out.append("#include <stdlib.h>\n\n");
-    }
 
-    @Override
-    public void exitPrograma(LAParser.ProgramaContext ctx) {
-        this.out.append("return 0;\n}");
-    }
+        this.visitDeclaracoes(ctx.declaracoes());
 
-    @Override
-    public void exitDeclaracoes(LAParser.DeclaracoesContext ctx) {
         this.out.append("int main() {\n");
+
+        this.visitCorpo(ctx.corpo());
+
+        this.out.append("return 0;\n}");
+
+        return null;
     }
 
     @Override
-    public void enterDeclVariavel(LAParser.DeclVariavelContext ctx) {
+    public String visitDeclVariavel(LAParser.DeclVariavelContext ctx) {
         if(ctx.variavel().tipo().registro() == null) {
             String variavelTipo = this.parseTipoEstendido(ctx.variavel().tipo().tipo_estendido());
 
@@ -172,10 +172,12 @@ class LAGeracao extends LABaseListener {
                 }
             }
         }
+
+        return null;
     }
 
     @Override
-    public void enterCmdLeia(LAParser.CmdLeiaContext ctx) {
+    public String visitCmdLeia(LAParser.CmdLeiaContext ctx) {
         this.out.append("scanf(\"");
         List<String> variaveis = new ArrayList<String>();
         
@@ -191,10 +193,12 @@ class LAGeracao extends LABaseListener {
         }
 
         this.out.append(");\n");
+        
+        return null;
     }
 
     @Override
-    public void enterCmdEscreva(LAParser.CmdEscrevaContext ctx) {
+    public String visitCmdEscreva(LAParser.CmdEscrevaContext ctx) {
         this.out.append("printf(\"");
         List<String> expressoes = new ArrayList<String>();
 
@@ -211,5 +215,13 @@ class LAGeracao extends LABaseListener {
         }
 
         this.out.append(");\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdSe(LAParser.CmdSeContext ctx) {
+        
+        return null;
     }
 }
