@@ -94,7 +94,7 @@ class LAGeracao extends LABaseVisitor<String> {
 
     public String tipoParcelaUnario(LAParser.Parcela_unarioContext ctx) {
         if(ctx.var != null) {
-            return this.pilha.encontrarVariavel(ctx.var.getText()).getTipoDeDado();
+            return this.pilha.encontrarVariavel(this.parseIdentificador(ctx.var)).getTipoDeDado();
         } else if(ctx.func != null) {
             return this.pilha.encontrarFuncao(ctx.func.getText()).getTipoRetorno();
         } else if(ctx.inteiro != null) {
@@ -219,7 +219,7 @@ class LAGeracao extends LABaseVisitor<String> {
                 if(variavelTipo.equals("char")) {
                     this.out.append(variavelTipo + " " + variavelNome + "[80];\n");
                 } else {
-                    this.out.append(variavelTipo + " " + variavelNome + ";\n");
+                    this.out.append(variavelTipo + " " + variavelNome + identCtx.dimensao().getText() + ";\n");
                 }
             }
         }
@@ -279,7 +279,7 @@ class LAGeracao extends LABaseVisitor<String> {
 
     @Override
     public String visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
-        String nome = this.parseIdentificador(ctx.identificador());
+        String nome = ctx.identificador().getText();
         nome = (ctx.ptr == null)?nome:"*"+nome;
 
         this.out.append(nome + "=" + this.exprToCExpr(ctx.expressao().getText()) + ";\n");
