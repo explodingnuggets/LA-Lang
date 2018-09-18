@@ -261,6 +261,21 @@ class LAGeracao extends LABaseVisitor<String> {
     }
 
     @Override
+    public String visitCmdPara(LAParser.CmdParaContext ctx) {
+        String nome = ctx.IDENT().getText();
+
+        this.out.append("for(int " + nome + "=" + ctx.from.getText() + ";" + nome + "<=" + ctx.to.getText() + ";" + nome + "++) {\n");
+
+        for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
+            this.visitCmd(cmdCtx);
+        }
+
+        this.out.append("}\n");
+
+        return null;
+    }
+
+    @Override
     public String visitCmdCaso(LAParser.CmdCasoContext ctx) {
         this.out.append("switch(" + this.exprToCExpr(ctx.exp_aritmetica().getText()) + ") {\n");
 
