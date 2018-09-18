@@ -66,12 +66,12 @@ class LAGeracao extends LABaseListener {
     @Override
     public void enterPrograma(LAParser.ProgramaContext ctx) {
         this.out.append("#include <stdio.h>\n");
-        this.out.append("#include <stdlib.h>\n");
+        this.out.append("#include <stdlib.h>\n\n");
     }
 
     @Override
     public void exitPrograma(LAParser.ProgramaContext ctx) {
-        this.out.append("}");
+        this.out.append("return 0;\n}");
     }
 
     @Override
@@ -117,7 +117,16 @@ class LAGeracao extends LABaseListener {
         this.out.append("printf(\"");
         List<String> expressoes = new ArrayList<String>();
 
-        
+        String nome=this.parseIdentificador(ctx.first.first.first.parcela_logica().exp_relacional().first.first.first.first.parcela_unario().var);
+        String tipo = this.pilha.encontrarVariavel(nome).getTipoDeDado();
+
+        expressoes.add(nome);
+        this.out.append(this.typeToCPrintf(tipo));
+
+        this.out.append("\"");
+        for(String expressao:expressoes) {
+            this.out.append("," + expressao);
+        }
 
         this.out.append(");\n");
     }

@@ -82,7 +82,7 @@ cmdLeia
     : 'leia' '(' (pointerFirst='^')? first=identificador (',' (pointerRest+='^')? rest+=identificador)* ')';
 
 cmdEscreva
-    : 'escreva' '(' expressao (',' expressao)* ')';
+    : 'escreva' '(' first=expressao (',' rest+=expressao)* ')';
 
 cmdSe
     : 'se' expressao 'entao' (seCmd+=cmd)* ('senao' (senaoCmd+=cmd)*)? 'fim_se';
