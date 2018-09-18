@@ -77,6 +77,21 @@ class LAGeracao extends LABaseVisitor<String> {
         return expr.replaceAll("(?<![<>])=", "==").replaceAll("nao", "!");
     }
 
+    public void parseParametros(LAParser.ParametrosContext ctx) {
+        for(LAParser.ParametroContext parCtx: ctx.parametro()) {
+            String tipo = this.typeToCFormat(parCtx.tipo_estendido().getText());
+
+            for(LAParser.IdentificadorContext identCtx: parCtx.identificador()) {
+                String nome = this.parseIdentificador(identCtx);
+
+                this.pilha.adicionarSimbolo(nome, "variavel", tipo);
+
+                nome = (tipo.equals("char"))?nome+"[80]":nome;
+                this.out.append(tipo + " " + nome);
+            }
+        }
+    }
+
     public String tipoParcelaUnario(LAParser.Parcela_unarioContext ctx) {
         if(ctx.var != null) {
             return this.pilha.encontrarVariavel(ctx.var.getText()).getTipoDeDado();
@@ -164,6 +179,27 @@ class LAGeracao extends LABaseVisitor<String> {
         this.visitCorpo(ctx.corpo());
 
         this.out.append("return 0;\n}");
+
+        return null;
+    }
+
+    @Override
+    public String visitDeclaracao_global(LAParser.Declaracao_globalContext ctx) {
+        String nome = ctx.IDENT().getText();
+
+        this.pilha.novaTabela();
+        if(ctx.type == null) {
+            this.out.append("void " + nome + "(");
+
+            this.parseParametros(ctx.parametros());
+
+            this.out.append(") {\n");
+
+            this.visitChildren(ctx);
+
+            this.out.append("}\n");
+        }
+        this.pilha.removerTabela();
 
         return null;
     }
@@ -306,6 +342,13 @@ class LAGeracao extends LABaseVisitor<String> {
         }
 
         this.out.append("} while(" + this.exprToCExpr(ctx.expressao().getText()) + ");\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitCmdChamada(LAParser.CmdChamadaContext ctx) {
+        this.out.append(ctx.getText() + ";\n");
 
         return null;
     }
