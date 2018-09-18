@@ -40,7 +40,7 @@ class LAGeracao extends LABaseListener {
             case "inteiro":
                 return "int";
             case "real":
-                return "double";
+                return "float";
             case "literal":
                 return "char*";
             case "logico":
@@ -54,7 +54,7 @@ class LAGeracao extends LABaseListener {
         switch(tipo) {
             case "int":
                 return "%d";
-            case "double":
+            case "float":
                 return "%f";
             case "char*":
                 return "%s";
