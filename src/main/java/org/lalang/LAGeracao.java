@@ -42,7 +42,7 @@ class LAGeracao extends LABaseListener {
             case "real":
                 return "float";
             case "literal":
-                return "char*";
+                return "char";
             case "logico":
                 return "int";
             default:
@@ -56,7 +56,7 @@ class LAGeracao extends LABaseListener {
                 return "%d";
             case "float":
                 return "%f";
-            case "char*":
+            case "char":
                 return "%s";
             default:
                 return "";
@@ -88,7 +88,11 @@ class LAGeracao extends LABaseListener {
                 String variavelNome = this.parseIdentificador(identCtx);
                 
                 this.pilha.adicionarSimbolo(variavelNome, "variavel", variavelTipo);
-                this.out.append(variavelTipo + " " + variavelNome + ";\n");
+                if(variavelTipo.equals("char")) {
+                    this.out.append(variavelTipo + " " + variavelNome + "[80];\n");
+                } else {
+                    this.out.append(variavelTipo + " " + variavelNome + ";\n");
+                }
             }
         }
     }
