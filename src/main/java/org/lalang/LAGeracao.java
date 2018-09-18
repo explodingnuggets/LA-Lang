@@ -234,7 +234,7 @@ class LAGeracao extends LABaseVisitor<String> {
     public String visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
         String nome = this.parseIdentificador(ctx.identificador());
 
-        this.out.append(nome + "=" + this.exprToCExpr(ctx.expressao().getText()) + "\n");
+        this.out.append(nome + "=" + this.exprToCExpr(ctx.expressao().getText()) + ";\n");
 
         return null;
     }
