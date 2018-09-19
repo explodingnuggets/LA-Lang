@@ -6,6 +6,11 @@ Para compilar seu programa em LA para um em C execute no terminala partir da pas
 ```
 java -jar build/libs/LA-Lang.jar programa-em-la > programa-em-c.c
 ```
+Para executar então, compila-se o arquivo C e executa-se o binário gerado:
+```
+gcc programa-em-c.c -o binario
+./binario
+```
 
 ## Especificações
 
