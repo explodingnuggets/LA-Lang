@@ -35,7 +35,7 @@ class LAGeracao extends LABaseVisitor<String> {
         }
     }
 
-    public void parseRegistro(LAParser.RegistroContext ctx, String prefix) {
+    public void parseRegistro(LAParser.RegistroContext ctx) {
         this.out.append("struct {\n");
         for(LAParser.VariavelContext varCtx: ctx.variavel()) {
             if(varCtx.tipo().registro() == null) {
@@ -44,7 +44,6 @@ class LAGeracao extends LABaseVisitor<String> {
                 for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
                     String variavelNome = this.parseIdentificador(identCtx);
 
-                    this.pilha.adicionarSimbolo(prefix + "." + variavelNome, "variavel", variavelTipo);
                     if(variavelTipo.equals("char")) {
                         this.out.append(variavelTipo + " " + variavelNome + "[80];\n");
                     } else {
@@ -54,6 +53,20 @@ class LAGeracao extends LABaseVisitor<String> {
             }
         }
         this.out.append("}");
+    }
+
+    public void stackRegistro(LAParser.RegistroContext ctx, String prefix) {
+        for(LAParser.VariavelContext varCtx: ctx.variavel()) {
+            if(varCtx.tipo().registro() == null) {
+                String variavelTipo = this.parseTipoEstendido(varCtx.tipo().tipo_estendido());
+
+                for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
+                    String variavelNome = this.parseIdentificador(identCtx);
+
+                    this.pilha.adicionarSimbolo(prefix + "." + variavelNome, "variavel", variavelTipo);
+                }
+            }
+        }
     }
 
     public String typeToCFormat(String tipo) {
@@ -242,13 +255,21 @@ class LAGeracao extends LABaseVisitor<String> {
                     this.out.append(variavelTipo + " " + variavelNome + "[80];\n");
                 } else {
                     this.out.append(variavelTipo + " " + variavelNome + identCtx.dimensao().getText() + ";\n");
+                    
+                    EntradaTipo tipo = this.pilha.encontrarTipo(variavelTipo);
+                    if(tipo != null) {
+                        for(EntradaSimbolo symbol: tipo.getCampos()) {
+                            this.pilha.adicionarSimbolo(variavelNome + "." + symbol.getNome(), "variavel", symbol.getTipoDeDado());
+                        }
+                    }
                 }
             }
         } else {
             for(LAParser.IdentificadorContext identCtx: ctx.variavel().identificador()) {
                 String variavelNome = this.parseIdentificador(identCtx);
 
-                this.parseRegistro(ctx.variavel().tipo().registro(), variavelNome);
+                this.parseRegistro(ctx.variavel().tipo().registro());
+                this.stackRegistro(ctx.variavel().tipo().registro(), variavelNome);
 
                 this.out.append(" " + variavelNome + ";\n");
             }
@@ -260,6 +281,32 @@ class LAGeracao extends LABaseVisitor<String> {
     @Override
     public String visitDeclConstante(LAParser.DeclConstanteContext ctx) {
         this.out.append("#define " + ctx.IDENT().getText() + " " + ctx.valor_constante().getText() + "\n");
+
+        return null;
+    }
+
+    @Override
+    public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
+        this.out.append("typedef ");
+
+        if(ctx.tipo().registro() != null) {
+            this.parseRegistro(ctx.tipo().registro());
+            List<EntradaSimbolo> campos = new ArrayList<EntradaSimbolo>();
+
+            for(LAParser.VariavelContext varCtx: ctx.tipo().registro().variavel()) {
+                String variavelTipo = this.parseTipoEstendido(varCtx.tipo().tipo_estendido());
+
+                for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
+                    String variavelNome = this.parseIdentificador(identCtx);
+
+                    campos.add(new EntradaSimbolo(variavelNome, "variavel", variavelTipo));
+                }
+            }
+
+            this.pilha.adicionarTipo(ctx.IDENT().getText(), campos);
+        }
+
+        this.out.append(" " + ctx.IDENT().getText() + ";\n");
 
         return null;
     }
