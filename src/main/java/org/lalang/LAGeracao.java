@@ -19,7 +19,7 @@ class LAGeracao extends LABaseVisitor<String> {
         String nome = ctx.first.getText();
 
         for(Token ident: ctx.rest) {
-            nome += ident.getText();
+            nome += "." + ident.getText();
         }
 
         return nome;
@@ -33,6 +33,27 @@ class LAGeracao extends LABaseVisitor<String> {
         } else {
             return tipo + "*";
         }
+    }
+
+    public void parseRegistro(LAParser.RegistroContext ctx, String prefix) {
+        this.out.append("struct {\n");
+        for(LAParser.VariavelContext varCtx: ctx.variavel()) {
+            if(varCtx.tipo().registro() == null) {
+                String variavelTipo = this.parseTipoEstendido(varCtx.tipo().tipo_estendido());
+
+                for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
+                    String variavelNome = this.parseIdentificador(identCtx);
+
+                    this.pilha.adicionarSimbolo(prefix + "." + variavelNome, "variavel", variavelTipo);
+                    if(variavelTipo.equals("char")) {
+                        this.out.append(variavelTipo + " " + variavelNome + "[80];\n");
+                    } else {
+                        this.out.append(variavelTipo + " " + variavelNome + identCtx.dimensao().getText() + ";\n");
+                    }
+                }
+            }
+        }
+        this.out.append("}");
     }
 
     public String typeToCFormat(String tipo) {
@@ -170,7 +191,8 @@ class LAGeracao extends LABaseVisitor<String> {
     @Override
     public String visitPrograma(LAParser.ProgramaContext ctx) {
         this.out.append("#include <stdio.h>\n");
-        this.out.append("#include <stdlib.h>\n\n");
+        this.out.append("#include <stdlib.h>\n");
+        this.out.append("#include <string.h>\n\n");
 
         this.visitDeclaracoes(ctx.declaracoes());
 
@@ -221,6 +243,14 @@ class LAGeracao extends LABaseVisitor<String> {
                 } else {
                     this.out.append(variavelTipo + " " + variavelNome + identCtx.dimensao().getText() + ";\n");
                 }
+            }
+        } else {
+            for(LAParser.IdentificadorContext identCtx: ctx.variavel().identificador()) {
+                String variavelNome = this.parseIdentificador(identCtx);
+
+                this.parseRegistro(ctx.variavel().tipo().registro(), variavelNome);
+
+                this.out.append(" " + variavelNome + ";\n");
             }
         }
 
@@ -280,9 +310,14 @@ class LAGeracao extends LABaseVisitor<String> {
     @Override
     public String visitCmdAtribuicao(LAParser.CmdAtribuicaoContext ctx) {
         String nome = ctx.identificador().getText();
+        String tipo = this.pilha.encontrarVariavel(this.parseIdentificador(ctx.identificador())).getTipoDeDado();
         nome = (ctx.ptr == null)?nome:"*"+nome;
 
-        this.out.append(nome + "=" + this.exprToCExpr(ctx.expressao().getText()) + ";\n");
+        if(tipo.equals("char")) {
+            this.out.append("strcpy(" + nome + "," + this.exprToCExpr(ctx.expressao().getText()) + ");\n");
+        } else {
+            this.out.append(nome + "=" + this.exprToCExpr(ctx.expressao().getText()) + ";\n");
+        }
 
         return null;
     }
