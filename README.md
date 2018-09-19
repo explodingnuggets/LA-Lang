@@ -1,6 +1,12 @@
 # LA-Lang
 Um compilador para a linguagem LA, com código resultante em C.
 
+## Compilação
+Para compilar seu programa em LA para um em C execute no terminala partir da pasta "LA-Lang":
+```
+java -jar build/libs/LA-Lang.jar programa-em-la > programa-em-c.c
+```
+
 ## Especificações
 
 A linguagem LA, foi criada para facilitar o ensino de algortimos e programação, permitindo trabalhar com uma linguagem simples, porém com os elementos essenciais de uma linguagem. Grande parte da sua sintaxe pode ser facilmente compilada para a linguagem C, sendo esse o objetivo desse compilador.
