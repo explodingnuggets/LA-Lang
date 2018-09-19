@@ -117,4 +117,8 @@ class PilhaDeTabelas {
     public EntradaTipo encontrarTipo(String nome) {
         return this.tipos.get(nome);
     }
+
+    public static void reset() {
+        PilhaDeTabelas.instancia = null;
+    }
 }

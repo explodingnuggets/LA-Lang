@@ -25,7 +25,7 @@ declaracao_local
     ;
 
 variavel
-    : identificador (',' identificador)* ':' tipo;
+    : first=identificador (',' rest+=identificador)* ':' tipo;
 
 identificador
     : first=IDENT ('.' rest+=IDENT)* dimensao;
@@ -43,7 +43,7 @@ tipo_basico_ident
     : tipo_basico | IDENT;
 
 tipo_estendido
-    : ('^')? tipo_basico_ident;
+    : (pointer='^')? tipo_basico_ident;
 
 valor_constante
     : CADEIA | NUM_INT | NUM_REAL | 'verdadeiro' | 'falso';
@@ -79,19 +79,19 @@ cmd
     ;
 
 cmdLeia
-    : 'leia' '(' ('^')? first=identificador (',' ('^')? rest+=identificador)* ')';
+    : 'leia' '(' (pointerFirst='^')? first=identificador (',' (pointerRest+='^')? rest+=identificador)* ')';
 
 cmdEscreva
-    : 'escreva' '(' expressao (',' expressao)* ')';
+    : 'escreva' '(' first=expressao (',' rest+=expressao)* ')';
 
 cmdSe
     : 'se' expressao 'entao' (seCmd+=cmd)* ('senao' (senaoCmd+=cmd)*)? 'fim_se';
 
 cmdCaso
-    : 'caso' exp_aritmetica 'seja' selecao ('senao' (cmd)*)? 'fim_caso';
+    : 'caso' exp_aritmetica 'seja' selecao ('senao' (senaoCmd+=cmd)*)? 'fim_caso';
 
 cmdPara
-    : 'para' IDENT '<-' exp_aritmetica 'ate' exp_aritmetica 'faca' (cmd)* 'fim_para';
+    : 'para' IDENT '<-' from=exp_aritmetica 'ate' to=exp_aritmetica 'faca' (cmd)* 'fim_para';
 
 cmdEnquanto
     : 'enquanto' expressao 'faca' (cmd)* 'fim_enquanto';
@@ -118,7 +118,7 @@ constantes
     : numero_intervalo (',' numero_intervalo)*;
 
 numero_intervalo
-    : (op_unario)? NUM_INT ('..' (op_unario)? NUM_INT)?;
+    : (first_neg=op_unario)? first=NUM_INT ('..' (second_neg=op_unario)? second=NUM_INT)?;
 
 op_unario
     : '-';
