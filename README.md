@@ -85,6 +85,7 @@ Os ponteiros na linguagem LA, funcionam da mesma maneira que ponteiros na lingua
 ## Estruturas e Técnicas Utilizadas
 
 ### Tabela de Símbolos
+Para poder se armazenar valores e tipos de variáveis utilizou-se a estratégia de armazená-las em uma tabela de símbolos. Sempre que referenciada uma variável ocorre uma busca nessa tabela, o que além de ser usado para a geração de código é usada para a análise semântica. Tal tabela é definida na classe _TabelaDeSimbolos.java_.
 
 ### Pilha de Tabelas de Símbolos
-
+Como há o problema de escopos diferentes para as variáveis utilizou-se a estratégia da pilha de tabelas, onde os escopos mais internos vão sendo colocados no topo desta pilha, sempre que ocorrendo uma busca, inserção ou remoção na entrada mais próxima do topo.
