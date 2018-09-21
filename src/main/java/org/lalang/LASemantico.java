@@ -61,29 +61,6 @@ class LASemantico extends LABaseVisitor<String> {
     }
 
     @Override
-    public String visitPrograma(LAParser.ProgramaContext ctx) {
-        visitDeclaracoes(ctx.declaracoes());
-
-        visitCorpo(ctx.corpo());
-        
-        return null;
-    }
-
-    @Override
-    public String visitDeclaracoes(LAParser.DeclaracoesContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
-    public String visitDecl_local_global(LAParser.Decl_local_globalContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
     public String visitDeclConstante(LAParser.DeclConstanteContext ctx) {
         String nome = ctx.IDENT().getText();
         String tipo = ctx.tipo_basico().getText();
@@ -105,34 +82,6 @@ class LASemantico extends LABaseVisitor<String> {
         }
 
         this.pilha.adicionarTipo(nome, campos);
-
-        return null;
-    }
-
-    @Override
-    public String visitVariavel(LAParser.VariavelContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
-    public String visitIdentificador(LAParser.IdentificadorContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
-    public String visitDimensao(LAParser.DimensaoContext ctx) {
-        visitChildren(ctx);
-
-        return null;
-    }
-
-    @Override
-    public String visitTipo(LAParser.TipoContext ctx) {
-        visitChildren(ctx);
 
         return null;
     }
