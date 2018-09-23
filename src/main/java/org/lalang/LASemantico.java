@@ -6,15 +6,31 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+// Em LABaseVisitor temos visits para todas as 
+// regras da gramática, em LASemantico o que se  
+// faz é aplicar a semântica da linguagem, ou 
+// seja, o contexto nas regras, como manter o  
+// controle dos escopos de funções e, então
+// verificar e imprimir os erros de compilação
+// relativos à semântica 
 class LASemantico extends LABaseVisitor<String> {
     private ErrorBuffer out;
     private PilhaDeTabelas pilha;
 
+    // recebe o arquivo em que será impressa a saída
+    // e gera a pilha de tabelas que fará as separações
+    // de escopos
     public LASemantico(ErrorBuffer out) {
         this.out = out;
         this.pilha = PilhaDeTabelas.getInstancia();
     }
 
+    // verifica se o tipo existe, ou se já foi
+    // declarado um novo tipo com aquele nome
+    // (na pilha de tabelas).
+    // Caso o tipo comece com '^'' se olha o 
+    // resto da string já que o '^' só simboliza
+    // se tratar de um ponteiro 
     public boolean existeTipo(String tipo) {
         if(tipo.charAt(0) == '^'){
             tipo = tipo.substring(1);
@@ -27,17 +43,31 @@ class LASemantico extends LABaseVisitor<String> {
         return false;
     }
 
+    // Declaração de registros, com suas variáveis
+    // adicionando-se os devidos caminhos para acessá-las
+    // com o '.' 
     public void declareRegistro(LAParser.RegistroContext ctx, String prefix) {
         for(LAParser.VariavelContext varCtx: ctx.variavel()) {
             for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
+                // adiciona-se o '.' no caminho do registrador para seu
+                // identificador (o qual pode ser um registrador também,
+                // chamando-se recursivamente)
                 String nome = prefix + "." + this.identificadorName(identCtx);
-
+                // caso o identificador não seja um registro,
+                // não precisa haver recursão
                 if(varCtx.tipo().registro() == null) {
+                    // verifica se já existe na tabela de símbolos
                     if(!this.pilha.adicionarSimbolo(nome, "variavel", varCtx.tipo().getText()))
                     this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                
+                //caso for um registro 
                 } else {
+                    // verifica se já existe na tabela de símbolos
                     if(this.pilha.encontrarVariavel(nome) != null) {
                         this.out.println("Linha " + identCtx.start.getLine() + ": identificador " + nome + " ja declarado anteriormente");
+                    
+                    // caso não exista, declarar esse
+                    // novo registro recursivamente
                     } else {    
                         this.declareRegistro(varCtx.tipo().registro(), nome);
                     }
@@ -46,6 +76,9 @@ class LASemantico extends LABaseVisitor<String> {
         }
     }
 
+    // Declaração de um tipo de registro
+    // declarando-se os tipos de identificadores
+    // que terão dentro dele
     public void tipoRegistro(LAParser.RegistroContext ctx, String prefix, List<EntradaSimbolo> campos) {
         for(LAParser.VariavelContext varCtx: ctx.variavel()) {
             for(LAParser.IdentificadorContext identCtx: varCtx.identificador()) {
@@ -60,6 +93,9 @@ class LASemantico extends LABaseVisitor<String> {
         }
     }
 
+    // Modifica-se o visit de declarações
+    // de constantes adicionando-se elas
+    // na pilha
     @Override
     public String visitDeclConstante(LAParser.DeclConstanteContext ctx) {
         String nome = ctx.IDENT().getText();
@@ -70,6 +106,10 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // Modifica-se o visit de declaraçoes
+    // de tipo adicionando-os na pilha caso
+    // não sejam registros ou chamando
+    // tipoRegistro quando forem
     @Override
     public String visitDeclTipo(LAParser.DeclTipoContext ctx) {
         String nome = ctx.IDENT().getText();
@@ -86,6 +126,10 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // Modifica-se o visit do comando
+    // 'Se' adicionando-se uma nova tabela
+    // na pilha (novo escopo) e uma nova tabela 
+    // para o Senao (caso necessário)
     @Override
     public String visitCmdSe(LAParser.CmdSeContext ctx) {
         /*
@@ -116,6 +160,10 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // Verifa-se se a variável na qual
+    // se está armazendo o valor lido foi
+    // declarando olhando-se na pilha de 
+    // tabelas
     @Override
     public String visitCmdLeia(LAParser.CmdLeiaContext ctx){
         String nome_variavel = this.identificadorName(ctx.first);
@@ -136,15 +184,19 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // Cria-se novos escopos para os
+    // casos e para o senão
     @Override
     public String visitCmdCaso(LAParser.CmdCasoContext ctx) {
         visitExp_aritmetica(ctx.exp_aritmetica());
 
+        // novo escopo para os casos
         this.pilha.novaTabela();
 
         visitSelecao(ctx.selecao());
 
         this.pilha.removerTabela();
+        // novo escopo para o senão
         this.pilha.novaTabela();
 
         for(LAParser.CmdContext cmdCtx: ctx.cmd()) {
@@ -156,6 +208,7 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // Cria-se novo escopo para o 'para'
     @Override
     public String visitCmdPara(LAParser.CmdParaContext ctx) {
         this.pilha.novaTabela();
@@ -169,6 +222,7 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // Cria-se o novo escopo para o 'enquanto'
     @Override
     public String visitCmdEnquanto(LAParser.CmdEnquantoContext ctx) {
         this.pilha.novaTabela();
@@ -180,6 +234,7 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // Cria-se o novo escopo
     @Override
     public String visitCmdFaca(LAParser.CmdFacaContext ctx) {
         this.pilha.novaTabela();
@@ -200,20 +255,26 @@ class LASemantico extends LABaseVisitor<String> {
         String nome = this.identificadorName(ctx.identificador());
 
         EntradaSimbolo simbolo = this.pilha.encontrarVariavel(nome);
+        // Caso a variável nao foi encontrada
+        // na tabela de símbolos significa que ela
+        // não foi declarada
         if(simbolo == null) {
             nome += ctx.identificador().dimensao().getText();
             out.println("Linha " + ctx.identificador().start.getLine() + ": identificador " + nome + " nao declarado");
         } else {
             String tipo = simbolo.getTipoDeDado();
+            // ve se a variável é um ponteiro
             if(ctx.ptr != null && tipo.charAt(0) == '^') {
                 tipo = tipo.substring(1);
                 nome = "^" + nome;
 
-                System.out.println(tipo);
             }
 
             String tipoExpressao = visitExpressao(ctx.expressao());
 
+            // Se o tipo do valor atribuído não ser o tipo
+            // da variável colocar mensagem de erro
+            // inteiro pode ser castado pra real
             if(!tipo.equals(tipoExpressao) && !(tipo.equals("real") && tipoExpressao.equals("inteiro"))) {
                 nome += ctx.identificador().dimensao().getText();
                 
@@ -224,6 +285,10 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // verifica se a função na pilha possui
+    // o mesmo número de parâmetros passados
+    // para esta chamada, e então se os tipos
+    // são equivalentes
     @Override
     public String visitCmdChamada(LAParser.CmdChamadaContext ctx) {
         String nome = ctx.IDENT().getText();
@@ -250,6 +315,8 @@ class LASemantico extends LABaseVisitor<String> {
         return null;
     }
 
+    // verifica se há um tipo de retorno para
+    // esse escopo mesmo (essa função)
     @Override
     public String visitCmdRetorne(LAParser.CmdRetorneContext ctx) {
         if(this.pilha.getTabela().getTipoRetorno().equals("")) {
