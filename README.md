@@ -2,9 +2,9 @@
 Um compilador para a linguagem LA, com código resultante em C.
 
 ## Compilação
-Para compilar seu programa em LA para um em C execute no terminala partir da pasta "LA-Lang":
+Para compilar seu programa em LA para um em C execute no terminal a partir da pasta "LA-Lang":
 ```
-java -jar build/libs/LA-Lang.jar programa-em-la > programa-em-c.c
+java -jar build/libs/LA-Lang.jar programa-em-la programa-em-c.c
 ```
 Para executar então, compila-se o arquivo C e executa-se o binário gerado:
 ```
